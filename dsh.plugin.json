@@ -1,0 +1,13 @@
+{
+  "id": "dsh-share",
+  "version": "0.1.0",
+  "main": "lib/index.js",
+  "description": "Privacy-first Markdown and self-contained HTML sharing for DSH sessions.",
+  "engines": {
+    "dsh": ">=0.0.1"
+  },
+  "contributes": {
+    "tools": [],
+    "skills": []
+  }
+}

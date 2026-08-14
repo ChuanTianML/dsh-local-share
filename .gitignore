@@ -1,0 +1,5 @@
+.DS_Store
+.sandbox/
+coverage/
+node_modules
+*.log

@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DSH_COMMIT: 47f943859bef60e4160492346772ded9b24f765a
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.0
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - name: Check out verified DeepSeek Harness
+        run: |
+          git clone https://github.com/deepseek-ai/deepseek-harness.git .sandbox/harness
+          git -C .sandbox/harness checkout "$DSH_COMMIT"
+      - name: Build verified DeepSeek Harness
+        run: |
+          pnpm --dir .sandbox/harness install --frozen-lockfile
+          pnpm --dir .sandbox/harness run build
+      - run: pnpm run check
