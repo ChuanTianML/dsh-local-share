@@ -55,7 +55,9 @@ describe('DSH Local Share browser composition', () => {
       expect(entry?.component).toBe(DshShareHeaderAction)
       expect(entry?.options).toMatchObject({ id: 'dsh-local-share', order: 100 })
       expect(entry?.locale).toBe('dsh-local-share')
-      expect(document.querySelector('style[data-dsh-local-share="true"]')).not.toBeNull()
+      const styles = document.querySelector('style[data-dsh-local-share="true"]')
+      expect(styles).not.toBeNull()
+      expect(styles?.textContent).toContain('.dsh-local-share-preview-overlay-visible{transition:none}')
 
       const injected = (entry?.inject as unknown as () => DshShareInjected)()
       const rendered = await injected.render({

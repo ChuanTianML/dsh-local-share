@@ -55,7 +55,7 @@ function visibleText(content: readonly ContentBlock[]): TextProjection {
         parts.push(block.text)
         break
       case 'image':
-        parts.push('[Image omitted]')
+        parts.push('Image omitted')
         attachments += 1
         break
       case 'reasoning':

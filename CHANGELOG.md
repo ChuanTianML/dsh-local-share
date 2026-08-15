@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.3.0 - 2026-08-15
+
+- Keep a fixed preview surface while privacy and format options regenerate,
+  cover each isolated iframe generation immediately until its new document is
+  painted, preserve the dialog scroll position during option changes, and
+  return to the top whenever the dialog reopens.
+- Render visible assistant GFM as static semantic HTML while preserving human
+  prompts literally. Raw HTML stays escaped, images are omitted, unsafe links
+  are inert, and the preview remains script-free and sandboxed.
+- Refresh the self-contained document with an Apple-inspired reading layout,
+  complete Markdown typography, dark mode, print styles, and responsive
+  spacing.
+
 ## 0.2.0 - 2026-08-15
 
 - Rename the package, plugin id, browser module, Remote namespace, and generated
