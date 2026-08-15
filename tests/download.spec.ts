@@ -15,7 +15,7 @@ describe('downloadShare', () => {
     expect(createObjectURL).toHaveBeenCalledOnce()
     expect(click).toHaveBeenCalledOnce()
     const anchor = click.mock.instances[0] as unknown as HTMLAnchorElement
-    expect(anchor.download).toBe('dsh-share-2026-08-14.md')
+    expect(anchor.download).toBe('dsh-local-share-2026-08-14.md')
     expect(anchor.href).toBe('blob:fixture')
     expect(anchor.isConnected).toBe(false)
     expect(revokeObjectURL).toHaveBeenCalledWith('blob:fixture')

@@ -7,7 +7,7 @@ import type { ShareRequest, ShareResult } from './contract.ts'
 import { renderShare } from './render.ts'
 import type { ShareLimits } from './render.ts'
 
-/** Strict `dshShare` service exposed through the Host Gateway. */
+/** Strict `dshLocalShare` service exposed through the Host Gateway. */
 export class DshShareRuntime extends TypertRemoteService {
   /**
    * Register the service and its resource limits.
@@ -15,7 +15,7 @@ export class DshShareRuntime extends TypertRemoteService {
    * @param limits - validated render limits.
    */
   constructor(ctx: Context, private readonly limits: ShareLimits) {
-    super(ctx, 'dshShare')
+    super(ctx, 'dshLocalShare')
   }
 
   /**
@@ -32,7 +32,7 @@ export class DshShareRuntime extends TypertRemoteService {
       snapshot = await this.ctx.sessionQuery.readSession(SessionId(request.sessionId))
     } catch {
       signal?.throwIfAborted()
-      throw new Error('dsh-share: unable to read this Session')
+      throw new Error('dsh-local-share: unable to read this Session')
     }
     signal?.throwIfAborted()
     return renderShare(snapshot, request, this.limits)

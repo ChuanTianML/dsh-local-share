@@ -84,7 +84,7 @@ function renderMarkdown(document: RedactedShareDocument, request: ShareRequest, 
   return [
     `# ${safeMarkdown(document.title)}`,
     '',
-    `> Exported by DSH Share at ${generatedAt}.`,
+    `> Exported by DSH Local Share at ${generatedAt}.`,
     `> Privacy: ${privacyLine(request.redact)}`,
     `> Tools: ${request.includeTools ? 'names, bounded arguments, and outcomes included; result bodies excluded.' : 'excluded.'}`,
     '> Always excluded: reasoning, system prompts, injected context, attachment bytes, Session identifiers, and working-directory metadata.',
@@ -121,7 +121,7 @@ function renderHtml(document: RedactedShareDocument, request: ShareRequest, gene
 </head>
 <body><main class="page">
 <h1>${escapeHtml(document.title)}</h1>
-<section class="meta"><p>Exported by DSH Share at ${escapeHtml(generatedAt)}.</p><p><strong>Privacy:</strong> ${escapeHtml(privacyLine(request.redact))}</p><p><strong>Tools:</strong> ${request.includeTools ? 'Names, bounded arguments, and outcomes included; result bodies excluded.' : 'Excluded.'}</p><p>Always excluded: reasoning, system prompts, injected context, attachment bytes, Session identifiers, and working-directory metadata.</p></section>
+<section class="meta"><p>Exported by DSH Local Share at ${escapeHtml(generatedAt)}.</p><p><strong>Privacy:</strong> ${escapeHtml(privacyLine(request.redact))}</p><p><strong>Tools:</strong> ${request.includeTools ? 'Names, bounded arguments, and outcomes included; result bodies excluded.' : 'Excluded.'}</p><p>Always excluded: reasoning, system prompts, injected context, attachment bytes, Session identifiers, and working-directory metadata.</p></section>
 ${entries}
 </main></body>
 </html>
@@ -152,7 +152,7 @@ export function renderShare(
   now: Date = new Date(),
 ): ShareResult {
   if (snapshot.events.length > limits.maxEvents) {
-    throw new ShareRenderError(`dsh-share: this Session has more than ${limits.maxEvents} events; raise maxEvents to export it`)
+    throw new ShareRenderError(`dsh-local-share: this Session has more than ${limits.maxEvents} events; raise maxEvents to export it`)
   }
   const projected = projectSession(snapshot.events, request.includeTools, limits.maxToolArgumentChars)
   const document = redactDocument(projected, request.redact)
@@ -161,12 +161,12 @@ export function renderShare(
   const html = renderHtml(document, request, generatedAt)
   const content = markdown ?? html
   if (content.length > limits.maxOutputChars || html.length > limits.maxOutputChars) {
-    throw new ShareRenderError(`dsh-share: generated output exceeds ${limits.maxOutputChars} characters; raise maxOutputChars to export it`)
+    throw new ShareRenderError(`dsh-local-share: generated output exceeds ${limits.maxOutputChars} characters; raise maxOutputChars to export it`)
   }
   const date = generatedAt.slice(0, 10)
   const markdownFormat = request.format === 'markdown'
   return {
-    filename: `dsh-share-${date}.${markdownFormat ? 'md' : 'html'}`,
+    filename: `dsh-local-share-${date}.${markdownFormat ? 'md' : 'html'}`,
     mimeType: markdownFormat ? 'text/markdown;charset=utf-8' : 'text/html;charset=utf-8',
     content,
     previewHtml: html,

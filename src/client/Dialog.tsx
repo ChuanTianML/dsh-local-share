@@ -100,7 +100,7 @@ export function DshShareHeaderAction({ sessionId, render, t }: DshShareProps): R
 
   return (
     <>
-      <button type="button" className="dsh-share-action" onClick={show}>
+      <button type="button" className="dsh-local-share-action" onClick={show}>
         <span>{t('action')}</span>
         <IconShareOutline16 size={12} />
       </button>
@@ -110,10 +110,10 @@ export function DshShareHeaderAction({ sessionId, render, t }: DshShareProps): R
         title={t('title')}
         description={t('description')}
         closeLabel={t('close')}
-        className="dsh-share-dialog"
-        contentClassName="dsh-share-content"
+        className="dsh-local-share-dialog"
+        contentClassName="dsh-local-share-content"
         footer={(
-          <div className="dsh-share-footer">
+          <div className="dsh-local-share-footer">
             <Button variant="outline" onClick={close}>{t('close')}</Button>
             <Button
               variant="outline"
@@ -134,22 +134,22 @@ export function DshShareHeaderAction({ sessionId, render, t }: DshShareProps): R
           </div>
         )}
       >
-        <div className="dsh-share-options">
-          <fieldset className="dsh-share-fieldset">
-            <legend className="dsh-share-legend">{t('format')}</legend>
-            <label className="dsh-share-choice">
+        <div className="dsh-local-share-options">
+          <fieldset className="dsh-local-share-fieldset">
+            <legend className="dsh-local-share-legend">{t('format')}</legend>
+            <label className="dsh-local-share-choice">
               <input
                 type="radio"
-                name={`dsh-share-format-${String(sessionId)}`}
+                name={`dsh-local-share-format-${String(sessionId)}`}
                 checked={format === 'markdown'}
                 onChange={() => { setFormat('markdown') }}
               />
               <span>{t('markdown')}</span>
             </label>
-            <label className="dsh-share-choice">
+            <label className="dsh-local-share-choice">
               <input
                 type="radio"
-                name={`dsh-share-format-${String(sessionId)}`}
+                name={`dsh-local-share-format-${String(sessionId)}`}
                 checked={format === 'html'}
                 onChange={() => { setFormat('html') }}
               />
@@ -157,7 +157,7 @@ export function DshShareHeaderAction({ sessionId, render, t }: DshShareProps): R
             </label>
           </fieldset>
           <div>
-            <label className="dsh-share-check">
+            <label className="dsh-local-share-check">
               <input
                 type="checkbox"
                 checked={includeTools}
@@ -165,7 +165,7 @@ export function DshShareHeaderAction({ sessionId, render, t }: DshShareProps): R
               />
               <span>{t('includeTools')}</span>
             </label>
-            <label className="dsh-share-check">
+            <label className="dsh-local-share-check">
               <input
                 type="checkbox"
                 checked={redact}
@@ -175,7 +175,7 @@ export function DshShareHeaderAction({ sessionId, render, t }: DshShareProps): R
             </label>
           </div>
           {!redact && (
-            <label className="dsh-share-check dsh-share-risk">
+            <label className="dsh-local-share-check dsh-local-share-risk">
               <input
                 type="checkbox"
                 checked={acknowledged}
@@ -185,10 +185,10 @@ export function DshShareHeaderAction({ sessionId, render, t }: DshShareProps): R
             </label>
           )}
         </div>
-        <div className="dsh-share-preview-head">
-          <span className="dsh-share-preview-title">{t('preview')}</span>
+        <div className="dsh-local-share-preview-head">
+          <span className="dsh-local-share-preview-title">{t('preview')}</span>
           {result !== undefined && (
-            <span className="dsh-share-stats">
+            <span className="dsh-local-share-stats">
               {t('stats', {
                 messages: result.stats.messages,
                 tools: result.stats.toolCalls,
@@ -197,18 +197,18 @@ export function DshShareHeaderAction({ sessionId, render, t }: DshShareProps): R
             </span>
           )}
         </div>
-        {loading && <div className="dsh-share-placeholder" role="status">{t('loading')}</div>}
-        {!loading && error !== undefined && <div className="dsh-share-placeholder dsh-share-error" role="alert">{error}</div>}
+        {loading && <div className="dsh-local-share-placeholder" role="status">{t('loading')}</div>}
+        {!loading && error !== undefined && <div className="dsh-local-share-placeholder dsh-local-share-error" role="alert">{error}</div>}
         {!loading && error === undefined && result !== undefined && (
           <iframe
-            className="dsh-share-frame"
+            className="dsh-local-share-frame"
             title={t('preview')}
             sandbox=""
             srcDoc={result.previewHtml}
           />
         )}
         {result !== undefined && (
-          <ul className="dsh-share-warnings">
+          <ul className="dsh-local-share-warnings">
             {result.warnings.map(warning => <li key={warning}>{t(warningKey(warning))}</li>)}
           </ul>
         )}

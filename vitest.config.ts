@@ -12,7 +12,7 @@ const decoratorSyntax = /@(?:Remote|RemoteScope)\b/u
 /** Pre-transform standard decorators before Vitest's esbuild pass. */
 function standardDecoratorPlugin(): Plugin {
   return {
-    name: 'dsh-share-standard-decorators',
+    name: 'dsh-local-share-standard-decorators',
     enforce: 'pre' as const,
     transform(code: string, id: string) {
       const file = id.split('?', 1)[0]

@@ -3,7 +3,7 @@ import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client';
 import { type DshShareLocaleKey } from './locales.ts';
 declare module '@deepseek-ai/dsh-client-ui-slots' {
     interface LocaleNamespaceMap {
-        'dsh-share': DshShareLocaleKey;
+        'dsh-local-share': DshShareLocaleKey;
     }
 }
 /** Required browser services. */

@@ -10,7 +10,7 @@ import { adoptStyles } from './styles.ts'
 
 declare module '@deepseek-ai/dsh-client-ui-slots' {
   interface LocaleNamespaceMap {
-    'dsh-share': DshShareLocaleKey
+    'dsh-local-share': DshShareLocaleKey
   }
 }
 
@@ -26,8 +26,8 @@ interface DshShareNamespaceFace {
 
 /** Compose dictionaries, Remote binding, styles, and Session Header entry. */
 export function apply(ctx: ClientContext): void {
-  ctx.effect(adoptStyles, 'dsh-share: browser styles')
-  ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'dsh-share: browser dictionaries')
+  ctx.effect(adoptStyles, 'dsh-local-share: browser styles')
+  ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'dsh-local-share: browser dictionaries')
 
   let face: DshShareNamespaceFace | undefined
   let disposed = false
@@ -43,8 +43,8 @@ export function apply(ctx: ClientContext): void {
     try {
       const dispose = await ctx.remote.$mount(DSH_SHARE_REMOTE)
       face = (ctx.reflect as unknown as { get(name: string): unknown })
-        .get('remote.dshShare') as DshShareNamespaceFace | undefined
-      if (face === undefined) throw new Error('dsh-share: the dshShare Remote namespace did not mount')
+        .get('remote.dshLocalShare') as DshShareNamespaceFace | undefined
+      if (face === undefined) throw new Error('dsh-local-share: the dshLocalShare Remote namespace did not mount')
       resolveReady(face)
       return () => {
         disposed = true
@@ -55,11 +55,11 @@ export function apply(ctx: ClientContext): void {
       rejectReady(error)
       throw error
     }
-  }, 'dsh-share: remote')
+  }, 'dsh-local-share: remote')
 
   const render = async (request: ShareRequest, signal?: AbortSignal): Promise<ShareResult> => {
     const remote = face ?? await ready
-    if (disposed) throw new Error('dsh-share: browser plugin is disposed')
+    if (disposed) throw new Error('dsh-local-share: browser plugin is disposed')
     const result = await remote.render(request, signal)
     if (!result.ok) throw new Error(result.error.message)
     return result.value
@@ -67,7 +67,7 @@ export function apply(ctx: ClientContext): void {
 
   ctx.slots.inject('conversation.session.header.utilities', () => ctx.slots.register({
     name: 'conversation.session.header.utilities',
-    id: 'dsh-share',
+    id: 'dsh-local-share',
     order: 100,
     locale: NS,
     inject: (): DshShareInjected => ({ render }),

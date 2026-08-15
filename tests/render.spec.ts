@@ -14,7 +14,7 @@ describe('share rendering', () => {
     const result = renderShare(fixtureSnapshot(), {
       sessionId: 'session-private-id', format: 'markdown', includeTools: false, redact: true,
     }, LIMITS, NOW)
-    expect(result.filename).toBe('dsh-share-2026-08-14.md')
+    expect(result.filename).toBe('dsh-local-share-2026-08-14.md')
     expect(result.mimeType).toBe('text/markdown;charset=utf-8')
     expect(result.capturedThroughSeq).toBe(6)
     expect(result.content).toContain('# Private [REDACTED_PATH]')
@@ -38,7 +38,7 @@ describe('share rendering', () => {
     const result = renderShare(fixtureSnapshot(), {
       sessionId: 's1', format: 'html', includeTools: true, redact: true,
     }, LIMITS, NOW)
-    expect(result.filename).toBe('dsh-share-2026-08-14.html')
+    expect(result.filename).toBe('dsh-local-share-2026-08-14.html')
     expect(result.content).toBe(result.previewHtml)
     expect(result.content).toContain("default-src 'none'")
     expect(result.content).toContain('&lt;img src=&quot;https://tracker.invalid/x&quot;&gt;')

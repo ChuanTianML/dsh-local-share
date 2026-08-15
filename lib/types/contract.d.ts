@@ -1,4 +1,4 @@
-/** Strict wire contract shared by the DSH Share Host and Web halves. */
+/** Strict wire contract shared by the DSH Local Share Host and Web halves. */
 import type { InvocationDescriptor } from '@deepseek-ai/dsh-typert-protocol';
 import { z } from 'zod';
 /** Supported local document formats. */
@@ -62,13 +62,13 @@ export declare const shareResultSchema: z.ZodReadonly<z.ZodObject<{
         toolArgumentsTruncated: z.ZodNumber;
     }, z.core.$strict>>;
 }, z.core.$strict>>;
-/** Request value accepted by `dshShare/render`. */
+/** Request value accepted by `dshLocalShare/render`. */
 export type ShareRequest = z.infer<typeof shareRequestSchema>;
 /** Format selected for one generated document. */
 export type ShareFormat = z.infer<typeof shareFormatSchema>;
 /** Stable warning attached to one generated document. */
 export type ShareWarning = z.infer<typeof shareWarningSchema>;
-/** Result returned by `dshShare/render`. */
+/** Result returned by `dshLocalShare/render`. */
 export type ShareResult = z.infer<typeof shareResultSchema>;
-/** DSH Share's strict Remote invocation descriptors. */
+/** DSH Local Share's strict Remote invocation descriptors. */
 export declare const DSH_SHARE_INVOCATIONS: readonly InvocationDescriptor[];

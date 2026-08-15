@@ -82,7 +82,7 @@ export function fixtureSnapshot(): SessionLogSnapshot {
 /** Valid browser result for component and download tests. */
 export function fixtureResult(overrides: Partial<ShareResult> = {}): ShareResult {
   return {
-    filename: 'dsh-share-2026-08-14.md',
+    filename: 'dsh-local-share-2026-08-14.md',
     mimeType: 'text/markdown;charset=utf-8',
     content: '# Shared',
     previewHtml: '<!doctype html><html><body>Shared preview</body></html>',

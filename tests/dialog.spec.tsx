@@ -42,7 +42,7 @@ function props(render: DshShareProps['render']): DshShareProps {
   } as DshShareProps
 }
 
-describe('DSH Share dialog', () => {
+describe('DSH Local Share dialog', () => {
   it('opens with privacy-first defaults and shows the sandboxed preview', async () => {
     const remote = vi.fn(async (_request: ShareRequest, _signal?: AbortSignal) => fixtureResult())
     renderReact(<DshShareHeaderAction {...props(remote)} />)
@@ -131,15 +131,15 @@ describe('DSH Share dialog', () => {
 
     expect(pending[0]?.signal?.aborted).toBe(true)
     expect(pending[1]?.request.format).toBe('html')
-    pending[1]?.resolve(fixtureResult({ filename: 'dsh-share-2026-08-14.html' }))
+    pending[1]?.resolve(fixtureResult({ filename: 'dsh-local-share-2026-08-14.html' }))
     expect(await screen.findByTitle('Preview')).toBeInTheDocument()
   })
 
   it('shows a Remote failure and keeps export actions disabled', async () => {
-    const remote = vi.fn(async () => { throw new Error('dsh-share: unable to read this Session') })
+    const remote = vi.fn(async () => { throw new Error('dsh-local-share: unable to read this Session') })
     renderReact(<DshShareHeaderAction {...props(remote)} />)
     fireEvent.click(screen.getByRole('button', { name: 'Share' }))
-    expect(await screen.findByRole('alert')).toHaveTextContent('dsh-share: unable to read this Session')
+    expect(await screen.findByRole('alert')).toHaveTextContent('dsh-local-share: unable to read this Session')
     expect(screen.getByRole('button', { name: 'Copy source' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Download' })).toBeDisabled()
   })

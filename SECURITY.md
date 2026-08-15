@@ -1,6 +1,6 @@
 # Security
 
-DSH Share creates files locally in the browser. It does not upload content or
+DSH Local Share creates files locally in the browser. It does not upload content or
 make outbound network requests.
 
 Redaction is a best-effort safeguard, not a proof that a document is safe to

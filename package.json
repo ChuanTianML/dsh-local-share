@@ -1,7 +1,7 @@
 {
-  "name": "dsh-share",
-  "description": "Privacy-first Markdown and self-contained HTML sharing for DeepSeek Harness sessions",
-  "version": "0.1.0",
+  "name": "dsh-local-share",
+  "description": "Local, privacy-first Markdown and self-contained HTML sharing for DeepSeek Harness sessions",
+  "version": "0.2.0",
   "license": "MIT",
   "type": "module",
   "main": "lib/index.js",
@@ -111,17 +111,19 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ChuanTianML/dsh-share.git"
+    "url": "git+https://github.com/ChuanTianML/dsh-local-share.git"
   },
   "bugs": {
-    "url": "https://github.com/ChuanTianML/dsh-share/issues"
+    "url": "https://github.com/ChuanTianML/dsh-local-share/issues"
   },
-  "homepage": "https://github.com/ChuanTianML/dsh-share#readme",
+  "homepage": "https://github.com/ChuanTianML/dsh-local-share#readme",
   "keywords": [
     "deepseek",
     "deepseek-harness",
     "dsh-plugin",
+    "local-first",
     "session-export",
+    "session-sharing",
     "markdown",
     "privacy"
   ]
