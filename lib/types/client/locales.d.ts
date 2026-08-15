@@ -11,6 +11,7 @@ export declare const zh: {
     readonly html: "单文件 HTML";
     readonly includeTools: "包含工具调用（参数与结果状态）";
     readonly redact: "自动脱敏";
+    readonly redactionSummary: "自动脱敏已开启；分享前仍请检查预览。";
     readonly acknowledgement: "我已检查预览，并了解关闭脱敏可能泄露凭据和隐私数据。";
     readonly preview: "预览";
     readonly loading: "正在生成安全预览…";

@@ -49,6 +49,23 @@ and contributes `dsh-local-share` to
 aborts obsolete render requests. Copy uses the shared DSH clipboard primitive;
 download uses a short-lived browser object URL.
 
+The preview keeps one fixed-height shell mounted while options regenerate. An
+immediately opaque local loading layer covers iframe navigation until the
+current request generation has loaded and painted one animation frame. Every
+generation gets a new iframe, while copy and download remain keyed to the
+current request.
+The risk acknowledgement and safe-state note share one layout slot, so changing
+redaction does not move the preview. Reopening resets the internal scroll
+position after the initial iframe load.
+
+Visible assistant text is parsed as GFM after redaction and emitted as static
+semantic HTML. Authored raw HTML is escaped, Markdown images become omission
+markers, external HTTP(S) links receive safe new-window attributes, and unsafe
+or local destinations are inert. Human prompts remain literal. The generated
+HTML uses only inline fixed CSS, supports light, dark, print, and narrow-screen
+presentation, and declares a Content Security Policy that blocks scripts,
+images, fonts, frames, media, forms, objects, and connections.
+
 The wire request is:
 
 ```ts
@@ -78,12 +95,13 @@ truncated; the document and statistics state that truncation.
 
 ## Compatibility and verification
 
-Version 0.2.0 targets the DSH developer-preview API at Harness commit
+Version 0.3.0 targets the DSH developer-preview API at Harness commit
 `47f943859bef60e4160492346772ded9b24f765a`. DSH has no stable external plugin
 compatibility promise yet, so this repository pins the verified commit in CI.
 
-Unit tests cover projection, redaction, escaping, limits, wire codecs, browser
-acknowledgement, stale request cancellation, copy, and download. Composition
+Unit tests cover projection, redaction, safe GFM rendering, limits, wire codecs,
+stable preview loading, browser acknowledgement, stale request cancellation,
+scroll restoration, copy, and download. Composition
 tests mount the Host plugin over real Cordis and Typert services. Release
 verification builds the committed Host and browser artifacts, installs the
 bundle into an isolated Web profile, starts it on a non-default local port, and

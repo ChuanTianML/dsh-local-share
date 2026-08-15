@@ -1,5 +1,5 @@
 /** Session Header action and privacy-gated Share dialog. */
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-client-runtime/client'
 import {
@@ -28,6 +28,7 @@ export type DshShareProps = PropsRuntime<'conversation.session.header.utilities'
 type CopyState = 'idle' | 'copied' | 'failed'
 
 interface RenderedShare {
+  generation: number
   requestKey: string
   value: ShareResult
 }
@@ -47,14 +48,28 @@ export function DshShareHeaderAction({ sessionId, render, t }: DshShareProps): R
   const [rendered, setRendered] = useState<RenderedShare>()
   const [error, setError] = useState<string>()
   const [copyState, setCopyState] = useState<CopyState>('idle')
+  const nextGeneration = useRef(0)
+  const activeGeneration = useRef<number>()
+  const previewReadyFrame = useRef<number>()
+  const dialogBodyAnchor = useRef<HTMLDivElement>(null)
+  const resetScrollOnPreviewLoad = useRef(false)
   const requestKey = `${String(sessionId)}\u0000${format}\u0000${includeTools ? 'tools' : 'messages'}\u0000${redact ? 'redacted' : 'unredacted'}`
   const result = rendered?.requestKey === requestKey ? rendered.value : undefined
+  const previewUpdating = loading || (open && result === undefined && error === undefined)
+
+  useLayoutEffect(() => {
+    if (!open) return
+    const scrollContainer = dialogBodyAnchor.current?.closest<HTMLElement>('.dsh-local-share-content')
+    if (scrollContainer !== undefined && scrollContainer !== null) scrollContainer.scrollTop = 0
+  }, [open])
 
   useEffect(() => {
     if (!open) return
     const controller = new AbortController()
+    const generation = nextGeneration.current + 1
+    nextGeneration.current = generation
+    activeGeneration.current = generation
     setLoading(true)
-    setRendered(undefined)
     setError(undefined)
     setCopyState('idle')
     void render({
@@ -63,30 +78,66 @@ export function DshShareHeaderAction({ sessionId, render, t }: DshShareProps): R
       includeTools,
       redact,
     }, controller.signal).then(value => {
-      if (controller.signal.aborted) return
-      setRendered({ requestKey, value })
-      setLoading(false)
+      if (controller.signal.aborted || activeGeneration.current !== generation) return
+      setRendered({ generation, requestKey, value })
     }).catch((reason: unknown) => {
-      if (controller.signal.aborted) return
+      if (controller.signal.aborted || activeGeneration.current !== generation) return
       setError(reason instanceof Error ? reason.message : t('error'))
       setLoading(false)
     })
-    return () => { controller.abort() }
+    return () => {
+      controller.abort()
+      if (activeGeneration.current === generation) activeGeneration.current = undefined
+      if (previewReadyFrame.current !== undefined) {
+        cancelAnimationFrame(previewReadyFrame.current)
+        previewReadyFrame.current = undefined
+      }
+    }
   }, [format, includeTools, open, redact, render, requestKey, sessionId, t])
 
+  const invalidatePreview = (): void => {
+    activeGeneration.current = undefined
+    if (previewReadyFrame.current !== undefined) {
+      cancelAnimationFrame(previewReadyFrame.current)
+      previewReadyFrame.current = undefined
+    }
+    setLoading(true)
+  }
   const show = (): void => {
+    invalidatePreview()
     setFormat('markdown')
     setIncludeTools(false)
     setRedact(true)
     setAcknowledged(false)
+    resetScrollOnPreviewLoad.current = true
+    setRendered(undefined)
+    setError(undefined)
     setOpen(true)
   }
-  const close = (): void => { setOpen(false) }
+  const close = (): void => { invalidatePreview(); setOpen(false) }
   const changeRedaction = (enabled: boolean): void => {
     setRedact(enabled)
     setAcknowledged(false)
   }
-  const allowed = result !== undefined && !loading && (redact || acknowledged)
+  const allowed = result !== undefined && !previewUpdating && (redact || acknowledged)
+  const finishPreview = (generation: number): void => {
+    if (activeGeneration.current !== generation || rendered?.generation !== generation || rendered.requestKey !== requestKey) return
+    if (previewReadyFrame.current !== undefined) cancelAnimationFrame(previewReadyFrame.current)
+    previewReadyFrame.current = requestAnimationFrame(() => {
+      previewReadyFrame.current = undefined
+      if (activeGeneration.current !== generation) return
+      setLoading(false)
+      if (resetScrollOnPreviewLoad.current) {
+        previewReadyFrame.current = requestAnimationFrame(() => {
+          previewReadyFrame.current = undefined
+          if (activeGeneration.current !== generation) return
+          resetScrollOnPreviewLoad.current = false
+          const scrollContainer = dialogBodyAnchor.current?.closest<HTMLElement>('.dsh-local-share-content')
+          if (scrollContainer !== undefined && scrollContainer !== null) scrollContainer.scrollTop = 0
+        })
+      }
+    })
+  }
   const copy = (): void => {
     if (!allowed || result === undefined) return
     void writeClipboard(result.content).then(copied => {
@@ -134,7 +185,7 @@ export function DshShareHeaderAction({ sessionId, render, t }: DshShareProps): R
           </div>
         )}
       >
-        <div className="dsh-local-share-options">
+        <div ref={dialogBodyAnchor} className="dsh-local-share-options">
           <fieldset className="dsh-local-share-fieldset">
             <legend className="dsh-local-share-legend">{t('format')}</legend>
             <label className="dsh-local-share-choice">
@@ -142,7 +193,7 @@ export function DshShareHeaderAction({ sessionId, render, t }: DshShareProps): R
                 type="radio"
                 name={`dsh-local-share-format-${String(sessionId)}`}
                 checked={format === 'markdown'}
-                onChange={() => { setFormat('markdown') }}
+                onChange={() => { invalidatePreview(); setFormat('markdown') }}
               />
               <span>{t('markdown')}</span>
             </label>
@@ -151,7 +202,7 @@ export function DshShareHeaderAction({ sessionId, render, t }: DshShareProps): R
                 type="radio"
                 name={`dsh-local-share-format-${String(sessionId)}`}
                 checked={format === 'html'}
-                onChange={() => { setFormat('html') }}
+                onChange={() => { invalidatePreview(); setFormat('html') }}
               />
               <span>{t('html')}</span>
             </label>
@@ -161,7 +212,7 @@ export function DshShareHeaderAction({ sessionId, render, t }: DshShareProps): R
               <input
                 type="checkbox"
                 checked={includeTools}
-                onChange={event => { setIncludeTools(event.currentTarget.checked) }}
+                onChange={event => { invalidatePreview(); setIncludeTools(event.currentTarget.checked) }}
               />
               <span>{t('includeTools')}</span>
             </label>
@@ -169,21 +220,32 @@ export function DshShareHeaderAction({ sessionId, render, t }: DshShareProps): R
               <input
                 type="checkbox"
                 checked={redact}
-                onChange={event => { changeRedaction(event.currentTarget.checked) }}
+                onChange={event => { invalidatePreview(); changeRedaction(event.currentTarget.checked) }}
               />
               <span>{t('redact')}</span>
             </label>
           </div>
-          {!redact && (
-            <label className="dsh-local-share-check dsh-local-share-risk">
+          <div className="dsh-local-share-risk-slot">
+            <div
+              className={`dsh-local-share-safe-note${redact ? '' : ' dsh-local-share-safe-note-hidden'}`}
+              aria-hidden={!redact}
+            >
+              {t('redactionSummary')}
+            </div>
+            <label
+              className={`dsh-local-share-check dsh-local-share-risk${redact ? ' dsh-local-share-risk-hidden' : ''}`}
+              aria-hidden={redact}
+            >
               <input
                 type="checkbox"
                 checked={acknowledged}
+                disabled={redact}
+                tabIndex={redact ? -1 : undefined}
                 onChange={event => { setAcknowledged(event.currentTarget.checked) }}
               />
               <span>{t('acknowledgement')}</span>
             </label>
-          )}
+          </div>
         </div>
         <div className="dsh-local-share-preview-head">
           <span className="dsh-local-share-preview-title">{t('preview')}</span>
@@ -197,21 +259,33 @@ export function DshShareHeaderAction({ sessionId, render, t }: DshShareProps): R
             </span>
           )}
         </div>
-        {loading && <div className="dsh-local-share-placeholder" role="status">{t('loading')}</div>}
-        {!loading && error !== undefined && <div className="dsh-local-share-placeholder dsh-local-share-error" role="alert">{error}</div>}
-        {!loading && error === undefined && result !== undefined && (
-          <iframe
-            className="dsh-local-share-frame"
-            title={t('preview')}
-            sandbox=""
-            srcDoc={result.previewHtml}
-          />
-        )}
-        {result !== undefined && (
-          <ul className="dsh-local-share-warnings">
-            {result.warnings.map(warning => <li key={warning}>{t(warningKey(warning))}</li>)}
-          </ul>
-        )}
+        <div className="dsh-local-share-preview-shell">
+          {rendered !== undefined && (
+            <iframe
+              key={rendered.generation}
+              className="dsh-local-share-frame"
+              title={t('preview')}
+              sandbox=""
+              srcDoc={rendered.value.previewHtml}
+              onLoad={() => { finishPreview(rendered.generation) }}
+            />
+          )}
+          <div
+            className={`dsh-local-share-preview-overlay${previewUpdating || error !== undefined ? ' dsh-local-share-preview-overlay-visible' : ''}${error !== undefined ? ' dsh-local-share-preview-overlay-error' : ''}`}
+            aria-hidden={!previewUpdating && error === undefined}
+          >
+            {previewUpdating && (
+              <div className="dsh-local-share-loading" role="status">
+                <span className="dsh-local-share-spinner" aria-hidden="true" />
+                <span>{t('loading')}</span>
+              </div>
+            )}
+            {error !== undefined && <div className="dsh-local-share-error" role="alert">{error}</div>}
+          </div>
+        </div>
+        <ul className="dsh-local-share-warnings">
+          {result?.warnings.map(warning => <li key={warning}>{t(warningKey(warning))}</li>)}
+        </ul>
       </Modal>
     </>
   )

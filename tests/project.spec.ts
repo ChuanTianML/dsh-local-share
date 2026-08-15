@@ -11,7 +11,7 @@ describe('Session share projection', () => {
       {
         kind: 'message',
         role: 'user',
-        text: 'Use apiKey=sk-abcdefghijklmnop for alice@example.com.\n<img src="https://tracker.invalid/x">\n![pixel](https://tracker.invalid/pixel)\n\n[Image omitted]',
+        text: 'Use apiKey=sk-abcdefghijklmnop for alice@example.com.\n<img src="https://tracker.invalid/x">\n![pixel](https://tracker.invalid/pixel)\n\nImage omitted',
       },
       {
         kind: 'message',

@@ -16,12 +16,18 @@ conversation. DSH Local Share adds a **Share** action to the Web Session header,
 builds a local preview, and lets you copy the source or download a file.
 
 - Markdown or one script-free, self-contained HTML file
+- Safe GFM rendering for assistant headings, lists, tables, and code
 - Best-effort redaction enabled on every dialog opening
-- Preview before copy or download
+- Stable, flicker-free preview before copy or download
 - Tool names, bounded arguments, and outcomes are opt-in
 - Tool result bodies and model reasoning are never exported
 - No cloud service, account, public-link backend, or outbound request
 - Zero model-visible text and zero model-token overhead
+
+Assistant Markdown is rendered into a calm, readable document while the human
+prompt remains literal. This privacy-safe product mockup uses fictional data:
+
+![Synthetic preview of rendered assistant Markdown and local-only controls](assets/readme/share-markdown-v0.3.png)
 
 ## Quick start
 
@@ -29,7 +35,7 @@ DSH is currently a developer preview. Install the exact release into the Web
 profile, then start DSH:
 
 ```sh
-dsh plugin --profile web add github:ChuanTianML/dsh-local-share#v0.2.0
+dsh plugin --profile web add github:ChuanTianML/dsh-local-share#v0.3.0
 dsh --profile web
 ```
 
@@ -44,12 +50,12 @@ dsh plugin --profile web remove dsh-local-share
 
 ### Upgrading from DSH Share 0.1.0
 
-Version 0.2.0 uses a distinct package and plugin id to avoid colliding with an
+Version 0.2.0 and later use a distinct package and plugin id to avoid colliding with an
 unrelated community plugin named `dsh-share`:
 
 ```sh
 dsh plugin --profile web remove dsh-share
-dsh plugin --profile web add github:ChuanTianML/dsh-local-share#v0.2.0
+dsh plugin --profile web add github:ChuanTianML/dsh-local-share#v0.3.0
 ```
 
 ## See the privacy flow
@@ -70,11 +76,11 @@ and one YAML profile patch. Paste this request into a Coding Agent that has
 terminal access to the machine where DSH is installed:
 
 ```text
-Install DSH Local Share v0.2.0 into my DeepSeek Harness Web profile.
+Install DSH Local Share v0.3.0 into my DeepSeek Harness Web profile.
 
 1. Detect the active DSH_HOME and dsh version. Do not modify another profile.
 2. Inspect the repository package.json lifecycle scripts before installation.
-3. Install github:ChuanTianML/dsh-local-share#v0.2.0 into profile web.
+3. Install github:ChuanTianML/dsh-local-share#v0.3.0 into profile web.
 4. Preserve unrelated entries in profiles/web/cordis.patch.yml. Configure the
    dsh-local-share entry with maxEvents 20000, maxOutputChars 2000000, and
    maxToolArgumentChars 12000.
@@ -142,7 +148,9 @@ heuristic, not a guarantee. Always review the preview. If redaction is disabled,
 copy and download remain locked until a fresh risk acknowledgement is checked.
 
 The preview runs in a sandboxed `srcdoc` iframe. Generated HTML has no scripts or
-external resources and carries a restrictive Content Security Policy.
+external resources and carries a restrictive Content Security Policy. Visible
+assistant text is rendered as safe GFM; human prompts remain literal so the
+shared document preserves what the user actually entered.
 
 ## Why this plugin instead of the Session log ZIP?
 
@@ -177,7 +185,7 @@ The complete product and security design is in [docs/design.md](docs/design.md).
 
 ## Compatibility
 
-Version 0.2.0 targets the DSH developer-preview API at the verified revision
+Version 0.3.0 targets the DSH developer-preview API at the verified revision
 above. DSH does not yet promise stable external plugin compatibility; future
 Harness changes may require a new DSH Local Share release.
 
