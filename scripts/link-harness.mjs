@@ -15,10 +15,10 @@ const harness = resolve(process.env.DSH_HARNESS_ROOT ?? join(root, '.sandbox/har
 const modules = join(root, 'node_modules')
 
 if (!existsSync(join(harness, 'package.json'))) {
-  throw new Error(`dsh-share: Harness checkout not found at ${harness}; clone deepseek-ai/deepseek-harness there or set DSH_HARNESS_ROOT`)
+  throw new Error(`dsh-local-share: Harness checkout not found at ${harness}; clone deepseek-ai/deepseek-harness there or set DSH_HARNESS_ROOT`)
 }
 if (!existsSync(modules)) {
-  throw new Error('dsh-share: node_modules is missing; run pnpm install before a development command')
+  throw new Error('dsh-local-share: node_modules is missing; run pnpm install before a development command')
 }
 
 const packages = new Map([
@@ -40,13 +40,13 @@ for (const [name, relative] of packages) {
   const target = join(harness, relative)
   const link = join(modules, ...name.split('/'))
   if (!existsSync(join(target, 'package.json'))) {
-    throw new Error(`dsh-share: expected Harness package ${name} at ${target}`)
+    throw new Error(`dsh-local-share: expected Harness package ${name} at ${target}`)
   }
   mkdirSync(dirname(link), { recursive: true })
   if (existsSync(link)) {
     const existing = lstatSync(link)
     if (existing.isSymbolicLink() && realpathSync(link) === realpathSync(target)) continue
-    throw new Error(`dsh-share: refusing to replace existing dependency at ${link}`)
+    throw new Error(`dsh-local-share: refusing to replace existing dependency at ${link}`)
   }
   symlinkSync(target, link, 'dir')
 }

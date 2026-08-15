@@ -1,5 +1,5 @@
 # Mount the Host half under the package name resolved from the profile's
 # healed node_modules mirror. The `dsh.client` manifest loads the Web half.
 - insert:
-    - id: dsh-share
-      name: dsh-share
+    - id: dsh-local-share
+      name: dsh-local-share

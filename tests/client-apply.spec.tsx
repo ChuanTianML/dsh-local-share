@@ -19,7 +19,7 @@ class FixtureRemote extends Service {
 
   async $mount(contribution: TypertRemoteContribution): Promise<() => Promise<void>> {
     this.mounts.push(contribution)
-    const dispose = this.owner.reflect.provide('remote.dshShare', {
+    const dispose = this.owner.reflect.provide('remote.dshLocalShare', {
       render: async (request: unknown) => {
         this.calls.push(request)
         return { ok: true as const, value: fixtureResult() }
@@ -45,7 +45,7 @@ async function bench() {
   return { ctx, remote, fiber, declare }
 }
 
-describe('DSH Share browser composition', () => {
+describe('DSH Local Share browser composition', () => {
   it('mounts the Remote and contributes one disposable localized Header action', async () => {
     const b = await bench()
     try {
@@ -53,15 +53,15 @@ describe('DSH Share browser composition', () => {
       expect(b.remote.mounts).toHaveLength(1)
       const entry = b.ctx.slots.entries('conversation.session.header.utilities')[0]
       expect(entry?.component).toBe(DshShareHeaderAction)
-      expect(entry?.options).toMatchObject({ id: 'dsh-share', order: 100 })
-      expect(entry?.locale).toBe('dsh-share')
-      expect(document.querySelector('style[data-dsh-share="true"]')).not.toBeNull()
+      expect(entry?.options).toMatchObject({ id: 'dsh-local-share', order: 100 })
+      expect(entry?.locale).toBe('dsh-local-share')
+      expect(document.querySelector('style[data-dsh-local-share="true"]')).not.toBeNull()
 
       const injected = (entry?.inject as unknown as () => DshShareInjected)()
       const rendered = await injected.render({
         sessionId: 's1', format: 'markdown', includeTools: false, redact: true,
       })
-      expect(rendered.filename).toBe('dsh-share-2026-08-14.md')
+      expect(rendered.filename).toBe('dsh-local-share-2026-08-14.md')
       expect(b.remote.calls).toEqual([{
         sessionId: 's1', format: 'markdown', includeTools: false, redact: true,
       }])
@@ -70,8 +70,8 @@ describe('DSH Share browser composition', () => {
       b.declare()
     }
     expect(b.ctx.slots.entries('conversation.session.header.utilities')).toHaveLength(0)
-    expect(document.querySelector('style[data-dsh-share="true"]')).toBeNull()
-    expect(b.ctx.reflect.get('remote.dshShare')).toBeUndefined()
+    expect(document.querySelector('style[data-dsh-local-share="true"]')).toBeNull()
+    expect(b.ctx.reflect.get('remote.dshLocalShare')).toBeUndefined()
   })
 
   it('surfaces a Remote business error without exposing its details object', async () => {
@@ -79,7 +79,7 @@ describe('DSH Share browser composition', () => {
     try {
       const entry = b.ctx.slots.entries('conversation.session.header.utilities')[0]
       const injected = (entry?.inject as unknown as () => DshShareInjected)()
-      const face = b.ctx.reflect.get('remote.dshShare') as {
+      const face = b.ctx.reflect.get('remote.dshLocalShare') as {
         render: ReturnType<typeof vi.fn>
       }
       face.render = vi.fn(async () => ({

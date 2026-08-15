@@ -1,4 +1,4 @@
-# AGENTS.md — dsh-share
+# AGENTS.md — dsh-local-share
 
 This repository contains an out-of-tree DeepSeek Harness plugin. The Host half
 reads a validated Session snapshot and exposes one strict Typert Remote. The Web

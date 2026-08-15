@@ -3,7 +3,7 @@ import type { Context } from '@deepseek-ai/cordis';
 import { TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol';
 import type { ShareRequest, ShareResult } from './contract.ts';
 import type { ShareLimits } from './render.ts';
-/** Strict `dshShare` service exposed through the Host Gateway. */
+/** Strict `dshLocalShare` service exposed through the Host Gateway. */
 export declare class DshShareRuntime extends TypertRemoteService {
     private readonly limits;
     /**

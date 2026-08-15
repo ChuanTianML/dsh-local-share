@@ -1,5 +1,5 @@
 /** Locale namespace owned by the Share dialog. */
-export const NS = 'dsh-share'
+export const NS = 'dsh-local-share'
 
 /** Simplified-Chinese UI copy. */
 export const zh = {

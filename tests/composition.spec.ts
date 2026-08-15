@@ -30,7 +30,7 @@ async function mount(reader: (id: SessionId) => Promise<SessionLogSnapshot> = as
   return { ctx, fiber, registryFiber }
 }
 
-describe('DSH Share Host composition', () => {
+describe('DSH Local Share Host composition', () => {
   it('loads defaults, provides the service, and registers one strict invocation', async () => {
     const b = await mount()
     try {
@@ -41,10 +41,10 @@ describe('DSH Share Host composition', () => {
         maxToolArgumentChars: plugin.DEFAULT_MAX_TOOL_ARGUMENT_CHARS,
       })
       expect(() => plugin.Config({ maxEvents: 0 })).toThrow()
-      expect(b.ctx.get('dshShare')).toBeInstanceOf(plugin.DshShareRuntime)
-      expect(b.ctx.typert.local.get('dshShare/render')).toMatchObject({
-        id: 'dsh-share#dshShare/render',
-        service: 'dshShare',
+      expect(b.ctx.get('dshLocalShare')).toBeInstanceOf(plugin.DshShareRuntime)
+      expect(b.ctx.typert.local.get('dshLocalShare/render')).toMatchObject({
+        id: 'dsh-local-share#dshLocalShare/render',
+        service: 'dshLocalShare',
         method: 'render',
       })
     } finally {
@@ -59,15 +59,15 @@ describe('DSH Share Host composition', () => {
       seen.push(String(id))
       return fixtureSnapshot()
     })
-    const runtime = b.ctx.get('dshShare') as DshShareRuntime
+    const runtime = b.ctx.get('dshLocalShare') as DshShareRuntime
     const result = await runtime.render({
       sessionId: 'session-private-id', format: 'markdown', includeTools: false, redact: true,
     })
     expect(seen).toEqual(['session-private-id'])
     expect(result.content).toContain('[REDACTED_SECRET]')
     await b.fiber.dispose()
-    expect(b.ctx.get('dshShare')).toBeUndefined()
-    expect(b.ctx.typert.local.get('dshShare/render')).toBeUndefined()
+    expect(b.ctx.get('dshLocalShare')).toBeUndefined()
+    expect(b.ctx.typert.local.get('dshLocalShare/render')).toBeUndefined()
     await b.registryFiber.dispose()
   })
 
@@ -76,10 +76,10 @@ describe('DSH Share Host composition', () => {
       throw new Error('failed to open /Users/alice/private/session.jsonl')
     })
     try {
-      const runtime = b.ctx.get('dshShare') as DshShareRuntime
+      const runtime = b.ctx.get('dshLocalShare') as DshShareRuntime
       await expect(runtime.render({
         sessionId: 's1', format: 'html', includeTools: false, redact: true,
-      })).rejects.toThrow('dsh-share: unable to read this Session')
+      })).rejects.toThrow('dsh-local-share: unable to read this Session')
       await expect(runtime.render({
         sessionId: 's1', format: 'html', includeTools: false, redact: true,
       })).rejects.not.toThrow('/Users/alice')
@@ -96,7 +96,7 @@ describe('DSH Share Host composition', () => {
       return fixtureSnapshot()
     })
     try {
-      const runtime = b.ctx.get('dshShare') as DshShareRuntime
+      const runtime = b.ctx.get('dshLocalShare') as DshShareRuntime
       const cancelled = new AbortController()
       cancelled.abort()
       await expect(runtime.render({

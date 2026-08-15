@@ -1,5 +1,5 @@
 /** Privacy-first, deterministic text redaction used before document rendering. */
-/** Result of applying all DSH Share redaction rules to one string. */
+/** Result of applying all DSH Local Share redaction rules to one string. */
 export interface RedactionResult {
     /** Redacted text. */
     text: string;

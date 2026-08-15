@@ -6,7 +6,7 @@ import {
 } from '../src/contract.ts'
 import { fixtureResult } from './fixtures.ts'
 
-describe('DSH Share wire contract', () => {
+describe('DSH Local Share wire contract', () => {
   it('accepts the complete request and rejects unknown or malformed fields', () => {
     const request = { sessionId: 's1', format: 'markdown', includeTools: false, redact: true }
     expect(shareRequestSchema.parse(request)).toEqual(request)
@@ -28,9 +28,9 @@ describe('DSH Share wire contract', () => {
   it('publishes one strict cancellable direct invocation', () => {
     expect(DSH_SHARE_INVOCATIONS).toHaveLength(1)
     expect(DSH_SHARE_INVOCATIONS[0]).toMatchObject({
-      id: 'dsh-share#dshShare/render',
-      service: 'dshShare',
-      namespace: 'dshShare',
+      id: 'dsh-local-share#dshLocalShare/render',
+      service: 'dshLocalShare',
+      namespace: 'dshLocalShare',
       method: 'render',
       invocation: { kind: 'direct' },
       cancellation: { parameter: 'signal' },

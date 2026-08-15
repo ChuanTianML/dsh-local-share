@@ -1,8 +1,8 @@
-/** DSH Share Host plugin: Session projection service and strict Typert manifest. */
+/** DSH Local Share Host plugin: Session projection service and strict Typert manifest. */
 import type { Context } from '@deepseek-ai/cordis';
 import z from '@deepseek-ai/schemastery';
 /** Cordis plugin and client module id. */
-export declare const name = "dsh-share";
+export declare const name = "dsh-local-share";
 /** Services required before the Host plugin loads. */
 export declare const inject: string[];
 /** Maximum raw events accepted by default. */

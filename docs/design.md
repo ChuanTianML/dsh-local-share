@@ -1,8 +1,8 @@
-# DSH Share design
+# DSH Local Share design
 
 ## Product behavior
 
-DSH Share adds a Share utility to each Web Session header. The dialog renders a
+DSH Local Share adds a Share utility to each Web Session header. The dialog renders a
 local preview and produces either Markdown or one self-contained HTML file. The
 browser can copy the generated source or download it. The plugin has no upload
 endpoint and makes no outbound request.
@@ -37,14 +37,14 @@ required final review surface.
 ## Architecture
 
 The Host plugin depends on `sessionQuery` and `typert`. `DshShareRuntime`
-implements the strict `dshShare/render` Remote. It reads one replay-validated,
+implements the strict `dshLocalShare/render` Remote. It reads one replay-validated,
 live-preferred `SessionLogSnapshot`, checks the caller's cancellation state,
 projects shareable entries, redacts them, and renders both the requested file
 and a safe HTML preview. Read failures cross the wire as a generic message so
 private backend paths are not disclosed.
 
 The Web plugin mounts the same invocation descriptor, registers bilingual copy,
-and contributes `dsh-share` to
+and contributes `dsh-local-share` to
 `conversation.session.header.utilities`. React state owns dialog options and
 aborts obsolete render requests. Copy uses the shared DSH clipboard primitive;
 download uses a short-lived browser object URL.
@@ -78,7 +78,7 @@ truncated; the document and statistics state that truncation.
 
 ## Compatibility and verification
 
-Version 0.1.0 targets the DSH developer-preview API at Harness commit
+Version 0.2.0 targets the DSH developer-preview API at Harness commit
 `47f943859bef60e4160492346772ded9b24f765a`. DSH has no stable external plugin
 compatibility promise yet, so this repository pins the verified commit in CI.
 
@@ -91,7 +91,7 @@ checks the served plugin asset and Remote response path.
 
 ## Non-goals
 
-DSH Share does not provide a hosted public URL, collaboration permissions,
+DSH Local Share does not provide a hosted public URL, collaboration permissions,
 editable replay data, complete diagnostic logs, attachment export, model tools,
 or Feishu-specific publishing. The official Session log ZIP remains the right
 format for diagnosis and migration.

@@ -1,4 +1,4 @@
-/** Strict wire contract shared by the DSH Share Host and Web halves. */
+/** Strict wire contract shared by the DSH Local Share Host and Web halves. */
 import type { InvocationDescriptor } from '@deepseek-ai/dsh-typert-protocol'
 import { z } from 'zod'
 
@@ -45,7 +45,7 @@ export const shareResultSchema = z.object({
   stats: shareStatsSchema,
 }).strict().readonly()
 
-/** Request value accepted by `dshShare/render`. */
+/** Request value accepted by `dshLocalShare/render`. */
 export type ShareRequest = z.infer<typeof shareRequestSchema>
 
 /** Format selected for one generated document. */
@@ -54,15 +54,15 @@ export type ShareFormat = z.infer<typeof shareFormatSchema>
 /** Stable warning attached to one generated document. */
 export type ShareWarning = z.infer<typeof shareWarningSchema>
 
-/** Result returned by `dshShare/render`. */
+/** Result returned by `dshLocalShare/render`. */
 export type ShareResult = z.infer<typeof shareResultSchema>
 
-/** DSH Share's strict Remote invocation descriptors. */
+/** DSH Local Share's strict Remote invocation descriptors. */
 export const DSH_SHARE_INVOCATIONS: readonly InvocationDescriptor[] = [
   {
-    id: 'dsh-share#dshShare/render',
-    service: 'dshShare',
-    namespace: 'dshShare',
+    id: 'dsh-local-share#dshLocalShare/render',
+    service: 'dshLocalShare',
+    namespace: 'dshLocalShare',
     method: 'render',
     invocation: { kind: 'direct' },
     parameters: [
@@ -72,7 +72,7 @@ export const DSH_SHARE_INVOCATIONS: readonly InvocationDescriptor[] = [
         source: 'json',
         codec: {
           mode: 'strict',
-          typeSymbol: 'dsh-share#ShareRequest',
+          typeSymbol: 'dsh-local-share#ShareRequest',
           schema: shareRequestSchema,
         },
       },
@@ -80,7 +80,7 @@ export const DSH_SHARE_INVOCATIONS: readonly InvocationDescriptor[] = [
     cancellation: { parameter: 'signal' },
     result: {
       mode: 'strict',
-      typeSymbol: 'dsh-share#ShareResult',
+      typeSymbol: 'dsh-local-share#ShareResult',
       schema: shareResultSchema,
     },
   },
