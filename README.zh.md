@@ -3,17 +3,18 @@
 [![CI](https://github.com/ChuanTianML/dsh-local-share/actions/workflows/ci.yml/badge.svg)](https://github.com/ChuanTianML/dsh-local-share/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-面向 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) Session
-的本地、隐私优先 Markdown、单文件 HTML 与 PNG 长图分享插件。
+选择一个或多个 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)
+对话轮次，在本地导出为 Markdown、自包含 HTML 或 PNG 长图；默认脱敏，不上传
+内容。
 DSH Local Share 是一个独立的社区插件。
 
 [English](README.md)
 
 ![DSH Local Share 本地输出与隐私选项预览](assets/readme/share-dialog.jpg)
 
-无需上传对话，即可把完整 DSH Session 变成便于审阅的文档。DSH Local Share
-会在 Web Session Header 中加入 **分享** 入口，先在本机生成预览，再允许复制或
-下载结果。
+无需上传对话，即可把选中的对话轮次或完整 DSH Session 变成便于审阅的文档。
+DSH Local Share 会在 Web Session Header 中加入 **分享** 入口，先在本机生成
+预览，再允许复制或下载结果。
 
 - 可选择一个或多个对话轮次，也可分享完整 Session
 - 支持 Markdown、一个无脚本自包含 HTML 文件或一张 PNG 长图
@@ -36,14 +37,14 @@ DSH 目前仍处于开发者预览阶段。把精确的 npm release 安装到 We
 启动 DSH：
 
 ```sh
-dsh plugin --profile web add dsh-local-share@0.4.0
+dsh plugin --profile web add dsh-local-share@0.4.1
 dsh --profile web
 ```
 
 也可以继续从 GitHub 安装：
 
 ```sh
-dsh plugin --profile web add github:ChuanTianML/dsh-local-share#v0.4.0
+dsh plugin --profile web add github:ChuanTianML/dsh-local-share#v0.4.1
 ```
 
 打开一个非空 Session，点击 Header 中的 **分享**。安全默认值是 Markdown、排除
@@ -62,7 +63,7 @@ dsh plugin --profile web remove dsh-local-share
 
 ```sh
 dsh plugin --profile web remove dsh-share
-dsh plugin --profile web add dsh-local-share@0.4.0
+dsh plugin --profile web add dsh-local-share@0.4.1
 ```
 
 ## 查看隐私保护流程
@@ -77,15 +78,16 @@ dsh plugin --profile web add dsh-local-share@0.4.0
 
 ## 让 Coding Agent 安装
 
-可以。安装、配置和验收只需要可审计的 CLI 命令与一个 YAML profile patch。把
-下面的请求交给能够访问 DSH 所在机器终端的 Coding Agent：
+当用户希望只分享选中的 DSH 对话轮次，而不上传完整 Session 或导出文件时，使用
+这个插件。安装、配置和验收只需要可审计的 CLI 命令与一个 YAML profile patch。
+把下面的请求交给能够访问 DSH 所在机器终端的 Coding Agent：
 
 ```text
-请把 DSH Local Share 0.4.0 安装到我的 DeepSeek Harness Web profile。
+请把 DSH Local Share 0.4.1 安装到我的 DeepSeek Harness Web profile。
 
 1. 先检测当前 DSH_HOME 和 dsh 版本，不要修改其他 profile。
 2. 安装前检查仓库 package.json 中的生命周期脚本。
-3. 从 npm 将 dsh-local-share@0.4.0 安装到 web profile。
+3. 从 npm 将 dsh-local-share@0.4.1 安装到 web profile。
 4. 保留 profiles/web/cordis.patch.yml 中无关的条目。为 dsh-local-share 写入
    maxEvents 20000、maxOutputChars 2000000、maxToolArgumentChars 12000。
 5. 运行 dsh --profile web --dump-config，证明三个值已经进入最终配置。
@@ -184,7 +186,7 @@ checkout。`pnpm run check` 会运行严格类型检查、ESLint、单元与组�
 
 ## 兼容性
 
-0.4.0 面向上述 DSH 开发者预览 revision。DSH 尚未承诺稳定的外部插件兼容性；
+0.4.1 面向上述 DSH 开发者预览 revision。DSH 尚未承诺稳定的外部插件兼容性；
 Harness 后续变化可能需要发布新的 DSH Local Share 版本。
 
 ## 安全报告

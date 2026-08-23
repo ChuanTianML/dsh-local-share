@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.1 - 2026-08-23
+
+- Surface turn selection, local Markdown, self-contained HTML, long PNG,
+  redaction, and the no-upload data path in npm metadata, the plugin manifest,
+  and the first README paragraph so Coding Agents can identify the complete
+  core feature set before installation.
+- Add npm discovery keywords for turn selection, multi-turn sharing, and
+  conversation export.
+
 ## 0.4.0 - 2026-08-23
 
 - Group shareable content into user-led turns and let the user export any
