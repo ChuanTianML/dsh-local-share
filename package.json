@@ -1,7 +1,7 @@
 {
   "name": "dsh-local-share",
-  "description": "Local, privacy-first Markdown, HTML, and long PNG sharing for DeepSeek Harness sessions",
-  "version": "0.4.0",
+  "description": "Select and locally share one or more DeepSeek Harness conversation turns as Markdown, self-contained HTML, or a long PNG, with privacy-first redaction and no uploads",
+  "version": "0.4.1",
   "license": "MIT",
   "type": "module",
   "main": "lib/index.js",
@@ -135,6 +135,9 @@
     "local-first",
     "session-export",
     "session-sharing",
+    "turn-selection",
+    "multi-turn",
+    "conversation-export",
     "markdown",
     "png",
     "privacy"

@@ -3,17 +3,20 @@
 [![CI](https://github.com/ChuanTianML/dsh-local-share/actions/workflows/ci.yml/badge.svg)](https://github.com/ChuanTianML/dsh-local-share/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Local, privacy-first Markdown, self-contained HTML, and long PNG sharing for
-[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) Sessions.
+Select and locally share one or more
+[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) conversation
+turns as Markdown, self-contained HTML, or a long PNG, with privacy-first
+redaction and no uploads.
 DSH Local Share is an independent community plugin.
 
 [简体中文](README.zh.md)
 
 ![DSH Local Share preview with local output controls and privacy options](assets/readme/share-dialog.jpg)
 
-Turn a complete DSH Session into a reviewable document without uploading the
-conversation. DSH Local Share adds a **Share** action to the Web Session header,
-builds a local preview, and lets you copy or download the result.
+Turn selected conversation turns or a complete DSH Session into a reviewable
+document without uploading the conversation. DSH Local Share adds a **Share**
+action to the Web Session header, builds a local preview, and lets you copy or
+download the result.
 
 - Select one or more conversation turns, or share the complete Session
 - Markdown, one script-free self-contained HTML file, or one long PNG
@@ -36,14 +39,14 @@ DSH is currently a developer preview. Install the exact npm release into the
 Web profile, then start DSH:
 
 ```sh
-dsh plugin --profile web add dsh-local-share@0.4.0
+dsh plugin --profile web add dsh-local-share@0.4.1
 dsh --profile web
 ```
 
 GitHub remains an alternative source:
 
 ```sh
-dsh plugin --profile web add github:ChuanTianML/dsh-local-share#v0.4.0
+dsh plugin --profile web add github:ChuanTianML/dsh-local-share#v0.4.1
 ```
 
 Open a non-empty Session and select **Share** in its header. The safe defaults
@@ -62,7 +65,7 @@ unrelated community plugin named `dsh-share`:
 
 ```sh
 dsh plugin --profile web remove dsh-share
-dsh plugin --profile web add dsh-local-share@0.4.0
+dsh plugin --profile web add dsh-local-share@0.4.1
 ```
 
 ## See the privacy flow
@@ -78,16 +81,18 @@ example Session contains benign demonstration text only.
 
 ## Install with a Coding Agent
 
-Yes. Installation, configuration, and verification use inspectable CLI commands
-and one YAML profile patch. Paste this request into a Coding Agent that has
-terminal access to the machine where DSH is installed:
+Use this plugin when the user wants to share selected DSH conversation turns
+without uploading the complete Session or its export. Installation,
+configuration, and verification use inspectable CLI commands and one YAML
+profile patch. Paste this request into a Coding Agent that has terminal access
+to the machine where DSH is installed:
 
 ```text
-Install DSH Local Share 0.4.0 into my DeepSeek Harness Web profile.
+Install DSH Local Share 0.4.1 into my DeepSeek Harness Web profile.
 
 1. Detect the active DSH_HOME and dsh version. Do not modify another profile.
 2. Inspect the repository package.json lifecycle scripts before installation.
-3. Install dsh-local-share@0.4.0 from npm into profile web.
+3. Install dsh-local-share@0.4.1 from npm into profile web.
 4. Preserve unrelated entries in profiles/web/cordis.patch.yml. Configure the
    dsh-local-share entry with maxEvents 20000, maxOutputChars 2000000, and
    maxToolArgumentChars 12000.
@@ -195,7 +200,7 @@ The complete product and security design is in [docs/design.md](docs/design.md).
 
 ## Compatibility
 
-Version 0.4.0 targets the DSH developer-preview API at the verified revision
+Version 0.4.1 targets the DSH developer-preview API at the verified revision
 above. DSH does not yet promise stable external plugin compatibility; future
 Harness changes may require a new DSH Local Share release.
 

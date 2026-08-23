@@ -111,7 +111,7 @@ truncated; the document and statistics state that truncation.
 
 ## Compatibility and verification
 
-Version 0.4.0 targets the DSH developer-preview API at Harness commit
+Version 0.4.1 targets the DSH developer-preview API at Harness commit
 `47f943859bef60e4160492346772ded9b24f765a`. DSH has no stable external plugin
 compatibility promise yet, so this repository pins the verified commit in CI.
 

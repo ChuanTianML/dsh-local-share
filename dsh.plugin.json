@@ -1,8 +1,8 @@
 {
   "id": "dsh-local-share",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "main": "lib/index.js",
-  "description": "Local, privacy-first Markdown, HTML, and long PNG sharing for DSH sessions.",
+  "description": "Select and locally share one or more DSH conversation turns as Markdown, self-contained HTML, or a long PNG, with privacy-first redaction and no uploads.",
   "engines": {
     "dsh": ">=0.0.1"
   },
