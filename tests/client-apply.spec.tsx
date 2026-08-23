@@ -61,11 +61,11 @@ describe('DSH Local Share browser composition', () => {
 
       const injected = (entry?.inject as unknown as () => DshShareInjected)()
       const rendered = await injected.render({
-        sessionId: 's1', format: 'markdown', includeTools: false, redact: true,
+        sessionId: 's1', format: 'markdown', includeTools: false, redact: true, selectedTurnSeqs: null,
       })
       expect(rendered.filename).toBe('dsh-local-share-2026-08-14.md')
       expect(b.remote.calls).toEqual([{
-        sessionId: 's1', format: 'markdown', includeTools: false, redact: true,
+        sessionId: 's1', format: 'markdown', includeTools: false, redact: true, selectedTurnSeqs: null,
       }])
     } finally {
       await b.fiber.dispose()
@@ -89,7 +89,7 @@ describe('DSH Local Share browser composition', () => {
         error: { code: 'internal', message: 'safe failure', details: { private: '/Users/alice' } },
       }))
       await expect(injected.render({
-        sessionId: 's1', format: 'html', includeTools: false, redact: true,
+        sessionId: 's1', format: 'html', includeTools: false, redact: true, selectedTurnSeqs: null,
       })).rejects.toThrow('safe failure')
     } finally {
       await b.fiber.dispose()

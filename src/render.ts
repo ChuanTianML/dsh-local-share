@@ -6,7 +6,7 @@ import { gfmFromMarkdown } from 'mdast-util-gfm'
 import { micromark } from 'micromark'
 import { gfm, gfmHtml } from 'micromark-extension-gfm'
 import type { ShareRequest, ShareResult, ShareWarning } from './contract.ts'
-import { projectSession, redactDocument } from './project.ts'
+import { projectSession, redactDocument, selectTurns, summarizeTurns } from './project.ts'
 import type { RedactedShareDocument, ShareMessageEntry, ShareToolEntry } from './project.ts'
 
 const GFM_EXTENSION = gfm()
@@ -156,9 +156,10 @@ function markdownTool(entry: ShareToolEntry): string {
 
 /** Render the portable Markdown file. */
 function renderMarkdown(document: RedactedShareDocument, request: ShareRequest, generatedAt: string): string {
-  const entries = document.entries.length === 0
+  const projectedEntries = document.turns.flatMap(turn => turn.entries)
+  const entries = projectedEntries.length === 0
     ? '_No shareable messages were found in this Session._'
-    : document.entries.map(entry => entry.kind === 'message' ? markdownMessage(entry) : markdownTool(entry)).join('\n\n---\n\n')
+    : projectedEntries.map(entry => entry.kind === 'message' ? markdownMessage(entry) : markdownTool(entry)).join('\n\n---\n\n')
   return omitMarkdownImages([
     `# ${safeMarkdown(document.title)}`,
     '',
@@ -186,9 +187,10 @@ function htmlTool(entry: ShareToolEntry): string {
 
 /** Render script-free HTML used both as a file and as sandboxed preview. */
 function renderHtml(document: RedactedShareDocument, request: ShareRequest, generatedAt: string): string {
-  const entries = document.entries.length === 0
+  const projectedEntries = document.turns.flatMap(turn => turn.entries)
+  const entries = projectedEntries.length === 0
     ? '<p class="empty">No shareable messages were found in this Session.</p>'
-    : document.entries.map(entry => entry.kind === 'message' ? htmlMessage(entry) : htmlTool(entry)).join('\n')
+    : projectedEntries.map(entry => entry.kind === 'message' ? htmlMessage(entry) : htmlTool(entry)).join('\n')
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -236,7 +238,12 @@ export function renderShare(
     throw new ShareRenderError(`dsh-local-share: this Session has more than ${limits.maxEvents} events; raise maxEvents to export it`)
   }
   const projected = projectSession(snapshot.events, request.includeTools, limits.maxToolArgumentChars)
-  const document = redactDocument(projected, request.redact)
+  const availableTurnSeqs = new Set(projected.turns.map(turn => turn.startSeq))
+  if (request.selectedTurnSeqs?.some(seq => !availableTurnSeqs.has(seq)) === true) {
+    throw new ShareRenderError('dsh-local-share: the selected turn is no longer available; reopen Share and try again')
+  }
+  const selected = selectTurns(projected, request.selectedTurnSeqs)
+  const document = redactDocument(selected, request.redact)
   const generatedAt = now.toISOString()
   const markdown = request.format === 'markdown' ? renderMarkdown(document, request, generatedAt) : undefined
   const html = renderHtml(document, request, generatedAt)
@@ -253,6 +260,7 @@ export function renderShare(
     previewHtml: html,
     generatedAt,
     capturedThroughSeq: snapshot.events.at(-1)?.seq ?? null,
+    turns: summarizeTurns(projected, request.redact),
     warnings: warningCodes(document, request),
     stats: {
       ...document.stats,

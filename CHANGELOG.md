@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.0 - 2026-08-23
+
+- Group shareable content into user-led turns and let the user export any
+  non-empty turn subset while preserving log order, privacy filtering, and
+  redaction.
+- Add browser-local long PNG copy and download from the same script-free HTML
+  preview, with conservative canvas limits and no upload path.
+- Publish the prebuilt plugin as the `dsh-local-share` npm package while keeping
+  exact GitHub release installation available.
+
 ## 0.3.0 - 2026-08-15
 
 - Keep a fixed preview surface while privacy and format options regenerate,

@@ -3,15 +3,18 @@
 ## Product behavior
 
 DSH Local Share adds a Share utility to each Web Session header. The dialog renders a
-local preview and produces either Markdown or one self-contained HTML file. The
-browser can copy the generated source or download it. The plugin has no upload
+local preview and produces Markdown, one self-contained HTML file, or one long
+PNG. The browser can copy or download the result. The plugin has no upload
 endpoint and makes no outbound request.
 
 The default export contains direct human prompts and visible assistant text in
 log order. It excludes reasoning blocks, system prompts, request configuration,
 raw stream chunks, plugin-injected context, attachment bytes, Session ids,
 working-directory metadata, and replacement messages used only to reconstruct
-model context. Image blocks become an explicit omission marker.
+model context. Image blocks become an explicit omission marker. A direct human
+prompt starts a turn that retains following visible assistant and optional tool
+activity until the next direct prompt. The user may export all turns or any
+non-empty subset; selected turns keep log order.
 
 Tool calls are disabled by default. When enabled, each call is collapsed and
 contains the tool name, bounded arguments, and success or failure state. Tool
@@ -27,6 +30,9 @@ without copying arbitrary command output into the document.
   environment assignments, email addresses, and absolute user paths.
 - The preview uses a sandboxed `srcdoc` iframe with a restrictive content
   security policy and no scripts or external resources.
+- Long PNG generation temporarily gives that script-free preview a same-origin
+  sandbox capability so the parent can rasterize it. Conservative edge and
+  pixel budgets reject images that exceed reliable browser canvas limits.
 - Generated filenames contain only the product name and UTC date.
 - Turning redaction off clears prior acknowledgement. Copy and download remain
   disabled until the user explicitly acknowledges the risk.
@@ -48,6 +54,12 @@ and contributes `dsh-local-share` to
 `conversation.session.header.utilities`. React state owns dialog options and
 aborts obsolete render requests. Copy uses the shared DSH clipboard primitive;
 download uses a short-lived browser object URL.
+
+Turn selector metadata contains only a turn start sequence, bounded visible-text
+preview, and counts. The preview text passes through the same redaction mode as
+the document. PNG output is derived in the browser from the already-rendered
+safe HTML document with `html-to-image`; generated pixels are copied or placed
+in a short-lived download Blob and are never sent to the Host or a third party.
 
 The preview keeps one fixed-height shell mounted while options regenerate. An
 immediately opaque local loading layer covers iframe navigation until the
@@ -74,12 +86,16 @@ The wire request is:
   format: 'markdown' | 'html'
   includeTools: boolean
   redact: boolean
+  selectedTurnSeqs: number[] | null
 }
 ```
 
-The result contains the file name, media type, file content, safe preview HTML,
-capture sequence, stable warning codes, and projection statistics. Zod codecs
-reject unknown or malformed request and response fields.
+`null` selects all turns; an array must be non-empty and contain unique turn
+starts. The result contains the file name, media type, file content, safe
+preview HTML, capture sequence, redaction-matched metadata for every available
+turn, stable warning codes, and selected projection statistics. Zod codecs
+reject unknown or malformed request and response fields. The Host also rejects
+a selected turn that disappeared before rendering.
 
 ## Deployment configuration
 
@@ -95,17 +111,20 @@ truncated; the document and statistics state that truncation.
 
 ## Compatibility and verification
 
-Version 0.3.0 targets the DSH developer-preview API at Harness commit
+Version 0.4.0 targets the DSH developer-preview API at Harness commit
 `47f943859bef60e4160492346772ded9b24f765a`. DSH has no stable external plugin
 compatibility promise yet, so this repository pins the verified commit in CI.
 
 Unit tests cover projection, redaction, safe GFM rendering, limits, wire codecs,
 stable preview loading, browser acknowledgement, stale request cancellation,
-scroll restoration, copy, and download. Composition
+scroll restoration, turn selection, long-image limits, image clipboard behavior,
+copy, and download. Composition
 tests mount the Host plugin over real Cordis and Typert services. Release
 verification builds the committed Host and browser artifacts, installs the
 bundle into an isolated Web profile, starts it on a non-default local port, and
-checks the served plugin asset and Remote response path.
+checks the served plugin asset and Remote response path. The prebuilt package is
+published to npm as `dsh-local-share`; exact GitHub release and packed-tarball
+installation use the same committed artifacts.
 
 ## Non-goals
 

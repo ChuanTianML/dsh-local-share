@@ -61,7 +61,7 @@ describe('DSH Local Share Host composition', () => {
     })
     const runtime = b.ctx.get('dshLocalShare') as DshShareRuntime
     const result = await runtime.render({
-      sessionId: 'session-private-id', format: 'markdown', includeTools: false, redact: true,
+      sessionId: 'session-private-id', format: 'markdown', includeTools: false, redact: true, selectedTurnSeqs: null,
     })
     expect(seen).toEqual(['session-private-id'])
     expect(result.content).toContain('[REDACTED_SECRET]')
@@ -78,10 +78,10 @@ describe('DSH Local Share Host composition', () => {
     try {
       const runtime = b.ctx.get('dshLocalShare') as DshShareRuntime
       await expect(runtime.render({
-        sessionId: 's1', format: 'html', includeTools: false, redact: true,
+        sessionId: 's1', format: 'html', includeTools: false, redact: true, selectedTurnSeqs: null,
       })).rejects.toThrow('dsh-local-share: unable to read this Session')
       await expect(runtime.render({
-        sessionId: 's1', format: 'html', includeTools: false, redact: true,
+        sessionId: 's1', format: 'html', includeTools: false, redact: true, selectedTurnSeqs: null,
       })).rejects.not.toThrow('/Users/alice')
     } finally {
       await b.fiber.dispose()
@@ -100,7 +100,7 @@ describe('DSH Local Share Host composition', () => {
       const cancelled = new AbortController()
       cancelled.abort()
       await expect(runtime.render({
-        sessionId: 's1', format: 'markdown', includeTools: false, redact: true,
+        sessionId: 's1', format: 'markdown', includeTools: false, redact: true, selectedTurnSeqs: null,
       }, cancelled.signal)).rejects.toMatchObject({ name: 'AbortError' })
       expect(reads).toBe(0)
     } finally {

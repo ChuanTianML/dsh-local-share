@@ -1,7 +1,7 @@
 {
   "name": "dsh-local-share",
-  "description": "Local, privacy-first Markdown and self-contained HTML sharing for DeepSeek Harness sessions",
-  "version": "0.3.0",
+  "description": "Local, privacy-first Markdown, HTML, and long PNG sharing for DeepSeek Harness sessions",
+  "version": "0.4.0",
   "license": "MIT",
   "type": "module",
   "main": "lib/index.js",
@@ -52,7 +52,8 @@
     "test:coverage": "node scripts/link-harness.mjs && vitest run --coverage",
     "lint": "node scripts/link-harness.mjs && eslint .",
     "pack:check": "npm pack --dry-run --ignore-scripts",
-    "check": "pnpm run typecheck && pnpm run lint && pnpm run test:coverage && pnpm run build && pnpm run pack:check"
+    "check": "pnpm run typecheck && pnpm run lint && pnpm run test:coverage && pnpm run build && pnpm run pack:check",
+    "prepublishOnly": "pnpm run check"
   },
   "engines": {
     "node": "^22.19 || >=24"
@@ -89,11 +90,15 @@
     "react": { "optional": true }
   },
   "dependencies": {
+    "html-to-image": "^1.11.13",
     "mdast-util-from-markdown": "^2.0.3",
     "mdast-util-gfm": "^3.1.0",
     "micromark": "^4.0.2",
     "micromark-extension-gfm": "^3.0.0",
     "zod": "^4.4.3"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.0",
@@ -131,6 +136,7 @@
     "session-export",
     "session-sharing",
     "markdown",
+    "png",
     "privacy"
   ]
 }

@@ -12,3 +12,10 @@ export interface DownloadEnvironment {
  * @param environment - injectable browser operations for tests.
  */
 export declare function downloadShare(result: ShareResult, environment?: DownloadEnvironment): void;
+/**
+ * Start one local Blob download and release its object URL.
+ * @param blob - browser-local file content.
+ * @param filename - safe generated filename.
+ * @param environment - injectable browser operations for tests.
+ */
+export declare function downloadBlob(blob: Blob, filename: string, environment?: DownloadEnvironment): void;

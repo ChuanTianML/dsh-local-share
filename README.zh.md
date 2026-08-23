@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 面向 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) Session
-的本地、隐私优先 Markdown 与单文件 HTML 分享插件。
+的本地、隐私优先 Markdown、单文件 HTML 与 PNG 长图分享插件。
 DSH Local Share 是一个独立的社区插件。
 
 [English](README.md)
@@ -12,10 +12,11 @@ DSH Local Share 是一个独立的社区插件。
 ![DSH Local Share 本地输出与隐私选项预览](assets/readme/share-dialog.jpg)
 
 无需上传对话，即可把完整 DSH Session 变成便于审阅的文档。DSH Local Share
-会在 Web Session Header 中加入 **分享** 入口，先在本机生成预览，再允许复制源码
-或下载文件。
+会在 Web Session Header 中加入 **分享** 入口，先在本机生成预览，再允许复制或
+下载结果。
 
-- 支持 Markdown 或一个无脚本、自包含的 HTML 文件
+- 可选择一个或多个对话轮次，也可分享完整 Session
+- 支持 Markdown、一个无脚本自包含 HTML 文件或一张 PNG 长图
 - 安全渲染 Agent 回复中的标题、列表、表格与代码等 GFM 内容
 - 每次打开弹窗都默认开启尽力而为的自动脱敏
 - 复制或下载前先通过稳定、无闪烁的界面预览
@@ -31,12 +32,18 @@ Agent 的 Markdown 会变成安静、易读的文档；用户输入则保持原�
 
 ## 快速开始
 
-DSH 目前仍处于开发者预览阶段。把精确 release 安装到 Web profile，然后启动
-DSH：
+DSH 目前仍处于开发者预览阶段。把精确的 npm release 安装到 Web profile，然后
+启动 DSH：
 
 ```sh
-dsh plugin --profile web add github:ChuanTianML/dsh-local-share#v0.3.0
+dsh plugin --profile web add dsh-local-share@0.4.0
 dsh --profile web
+```
+
+也可以继续从 GitHub 安装：
+
+```sh
+dsh plugin --profile web add github:ChuanTianML/dsh-local-share#v0.4.0
 ```
 
 打开一个非空 Session，点击 Header 中的 **分享**。安全默认值是 Markdown、排除
@@ -55,7 +62,7 @@ dsh plugin --profile web remove dsh-local-share
 
 ```sh
 dsh plugin --profile web remove dsh-share
-dsh plugin --profile web add github:ChuanTianML/dsh-local-share#v0.3.0
+dsh plugin --profile web add dsh-local-share@0.4.0
 ```
 
 ## 查看隐私保护流程
@@ -74,16 +81,16 @@ dsh plugin --profile web add github:ChuanTianML/dsh-local-share#v0.3.0
 下面的请求交给能够访问 DSH 所在机器终端的 Coding Agent：
 
 ```text
-请把 DSH Local Share v0.3.0 安装到我的 DeepSeek Harness Web profile。
+请把 DSH Local Share 0.4.0 安装到我的 DeepSeek Harness Web profile。
 
 1. 先检测当前 DSH_HOME 和 dsh 版本，不要修改其他 profile。
 2. 安装前检查仓库 package.json 中的生命周期脚本。
-3. 将 github:ChuanTianML/dsh-local-share#v0.3.0 安装到 web profile。
+3. 从 npm 将 dsh-local-share@0.4.0 安装到 web profile。
 4. 保留 profiles/web/cordis.patch.yml 中无关的条目。为 dsh-local-share 写入
    maxEvents 20000、maxOutputChars 2000000、maxToolArgumentChars 12000。
 5. 运行 dsh --profile web --dump-config，证明三个值已经进入最终配置。
-6. 启动 Web profile，打开一个非空 Session，确认“分享”弹窗默认选择 Markdown、
-   排除工具调用并开启自动脱敏。
+6. 启动 Web profile，打开一个多轮 Session，确认“分享”弹窗默认选择全部轮次和
+   Markdown、排除工具调用并开启自动脱敏；再选择一个轮次，确认可以下载 PNG 长图。
 7. 报告运行过的每条命令和修改过的文件。未经我确认，不得上传导出的 Session，
    也不得关闭自动脱敏。
 ```
@@ -123,7 +130,8 @@ Session 或总输出超限会明确失败。只有工具参数允许截断，预
 
 ## 隐私行为
 
-默认文档只按日志顺序保留人类直接输入和助手可见文本。
+默认文档只按日志顺序保留人类直接输入和助手可见文本。用户可以选择任意非空的
+人类发起轮次子集；轮次选择不会削弱过滤和脱敏规则。
 
 | 内容 | 默认行为 | 可选行为 |
 | --- | --- | --- |
@@ -141,8 +149,9 @@ Session 或总输出超限会明确失败。只有工具参数允许截断，预
 复制和下载会保持锁定，直到重新勾选风险确认。
 
 预览运行在受 sandbox 限制的 `srcdoc` iframe 中。生成的 HTML 不含脚本和外部资源，
-并带有严格的 Content Security Policy。Agent 可见回复会按安全 GFM 渲染；人类输入
-保持原文，确保分享文档忠实保留用户实际输入的内容。
+并带有严格的 Content Security Policy。PNG 长图在浏览器中从同一份安全预览生成，
+不会上传。Agent 可见回复会按安全 GFM 渲染；人类输入保持原文，确保分享文档忠实
+保留用户实际输入的内容。
 
 ## 与 Session log ZIP 的区别
 
@@ -175,7 +184,7 @@ checkout。`pnpm run check` 会运行严格类型检查、ESLint、单元与组�
 
 ## 兼容性
 
-0.3.0 面向上述 DSH 开发者预览 revision。DSH 尚未承诺稳定的外部插件兼容性；
+0.4.0 面向上述 DSH 开发者预览 revision。DSH 尚未承诺稳定的外部插件兼容性；
 Harness 后续变化可能需要发布新的 DSH Local Share 版本。
 
 ## 安全报告

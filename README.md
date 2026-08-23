@@ -3,7 +3,7 @@
 [![CI](https://github.com/ChuanTianML/dsh-local-share/actions/workflows/ci.yml/badge.svg)](https://github.com/ChuanTianML/dsh-local-share/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Local, privacy-first Markdown and self-contained HTML sharing for
+Local, privacy-first Markdown, self-contained HTML, and long PNG sharing for
 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) Sessions.
 DSH Local Share is an independent community plugin.
 
@@ -13,9 +13,10 @@ DSH Local Share is an independent community plugin.
 
 Turn a complete DSH Session into a reviewable document without uploading the
 conversation. DSH Local Share adds a **Share** action to the Web Session header,
-builds a local preview, and lets you copy the source or download a file.
+builds a local preview, and lets you copy or download the result.
 
-- Markdown or one script-free, self-contained HTML file
+- Select one or more conversation turns, or share the complete Session
+- Markdown, one script-free self-contained HTML file, or one long PNG
 - Safe GFM rendering for assistant headings, lists, tables, and code
 - Best-effort redaction enabled on every dialog opening
 - Stable, flicker-free preview before copy or download
@@ -31,12 +32,18 @@ prompt remains literal. This privacy-safe product mockup uses fictional data:
 
 ## Quick start
 
-DSH is currently a developer preview. Install the exact release into the Web
-profile, then start DSH:
+DSH is currently a developer preview. Install the exact npm release into the
+Web profile, then start DSH:
 
 ```sh
-dsh plugin --profile web add github:ChuanTianML/dsh-local-share#v0.3.0
+dsh plugin --profile web add dsh-local-share@0.4.0
 dsh --profile web
+```
+
+GitHub remains an alternative source:
+
+```sh
+dsh plugin --profile web add github:ChuanTianML/dsh-local-share#v0.4.0
 ```
 
 Open a non-empty Session and select **Share** in its header. The safe defaults
@@ -55,7 +62,7 @@ unrelated community plugin named `dsh-share`:
 
 ```sh
 dsh plugin --profile web remove dsh-share
-dsh plugin --profile web add github:ChuanTianML/dsh-local-share#v0.3.0
+dsh plugin --profile web add dsh-local-share@0.4.0
 ```
 
 ## See the privacy flow
@@ -76,17 +83,18 @@ and one YAML profile patch. Paste this request into a Coding Agent that has
 terminal access to the machine where DSH is installed:
 
 ```text
-Install DSH Local Share v0.3.0 into my DeepSeek Harness Web profile.
+Install DSH Local Share 0.4.0 into my DeepSeek Harness Web profile.
 
 1. Detect the active DSH_HOME and dsh version. Do not modify another profile.
 2. Inspect the repository package.json lifecycle scripts before installation.
-3. Install github:ChuanTianML/dsh-local-share#v0.3.0 into profile web.
+3. Install dsh-local-share@0.4.0 from npm into profile web.
 4. Preserve unrelated entries in profiles/web/cordis.patch.yml. Configure the
    dsh-local-share entry with maxEvents 20000, maxOutputChars 2000000, and
    maxToolArgumentChars 12000.
 5. Run dsh --profile web --dump-config and prove those values are active.
-6. Start the Web profile, open a non-empty Session, and verify that Share opens
-   with Markdown selected, tool calls excluded, and redaction enabled.
+6. Start the Web profile, open a multi-turn Session, and verify that Share opens
+   with all turns and Markdown selected, tool calls excluded, and redaction
+   enabled. Select one turn, then verify that a long PNG can be downloaded.
 7. Report every command run and any file changed. Never upload an exported
    Session or disable redaction without asking me first.
 ```
@@ -129,7 +137,8 @@ loads.
 ## Privacy behavior
 
 The default document contains only direct human prompts and visible assistant
-text in log order.
+text in log order. The user may select any non-empty subset of human-led turns;
+selection does not weaken the same filtering and redaction rules.
 
 | Content | Default | Optional |
 | --- | --- | --- |
@@ -148,9 +157,10 @@ heuristic, not a guarantee. Always review the preview. If redaction is disabled,
 copy and download remain locked until a fresh risk acknowledgement is checked.
 
 The preview runs in a sandboxed `srcdoc` iframe. Generated HTML has no scripts or
-external resources and carries a restrictive Content Security Policy. Visible
-assistant text is rendered as safe GFM; human prompts remain literal so the
-shared document preserves what the user actually entered.
+external resources and carries a restrictive Content Security Policy. Long PNGs
+are generated from that same safe preview in the browser and are never uploaded.
+Visible assistant text is rendered as safe GFM; human prompts remain literal so
+the shared document preserves what the user actually entered.
 
 ## Why this plugin instead of the Session log ZIP?
 
@@ -185,7 +195,7 @@ The complete product and security design is in [docs/design.md](docs/design.md).
 
 ## Compatibility
 
-Version 0.3.0 targets the DSH developer-preview API at the verified revision
+Version 0.4.0 targets the DSH developer-preview API at the verified revision
 above. DSH does not yet promise stable external plugin compatibility; future
 Harness changes may require a new DSH Local Share release.
 

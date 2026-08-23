@@ -1,13 +1,14 @@
 import { describe, expect, it } from 'vitest'
-import { projectSession, redactDocument } from '../src/project.ts'
+import { projectSession, redactDocument, selectTurns, summarizeTurns } from '../src/project.ts'
 import type { SessionEvent } from '@deepseek-ai/dsh-session'
-import { fixtureSnapshot } from './fixtures.ts'
+import { fixtureMultiTurnSnapshot, fixtureSnapshot } from './fixtures.ts'
 
 describe('Session share projection', () => {
   it('keeps direct prompts and visible assistant text only', () => {
     const projected = projectSession(fixtureSnapshot().events, false, 100)
     expect(projected.title).toContain('/Users/alice/project')
-    expect(projected.entries).toEqual([
+    expect(projected.turns).toHaveLength(1)
+    expect(projected.turns[0]?.entries).toEqual([
       {
         kind: 'message',
         role: 'user',
@@ -20,6 +21,7 @@ describe('Session share projection', () => {
       },
     ])
     expect(projected.stats).toEqual({
+      turns: 1,
       messages: 2,
       toolCalls: 1,
       attachmentsOmitted: 1,
@@ -34,7 +36,7 @@ describe('Session share projection', () => {
 
   it('adds bounded tool arguments and an outcome only when requested', () => {
     const projected = projectSession(fixtureSnapshot().events, true, 24)
-    expect(projected.entries.at(-1)).toEqual({
+    expect(projected.turns[0]?.entries.at(-1)).toEqual({
       kind: 'tool',
       name: 'shell/bash',
       arguments: '{"cmd":"printf secret","\n… [truncated]',
@@ -71,7 +73,7 @@ describe('Session share projection', () => {
     } as unknown as SessionEvent)
 
     const projected = projectSession(events, true, 1_000)
-    expect(projected.entries.filter(entry => entry.kind === 'tool')).toEqual([
+    expect(projected.turns.flatMap(turn => turn.entries).filter(entry => entry.kind === 'tool')).toEqual([
       {
         kind: 'tool', name: 'shell/bash',
         arguments: '{"cmd":"printf secret","cwd":"/Users/alice/project"}',
@@ -82,5 +84,28 @@ describe('Session share projection', () => {
         status: 'unknown', truncated: false,
       },
     ])
+  })
+
+  it('groups user-led turns and selects them in log order with recomputed counts', () => {
+    const projected = projectSession(fixtureMultiTurnSnapshot().events, false, 1_000)
+    expect(projected.turns.map(turn => turn.startSeq)).toEqual([1, 7])
+    expect(projected.stats).toMatchObject({ turns: 2, messages: 4, toolCalls: 1 })
+    expect(summarizeTurns(projected, true)).toEqual([
+      expect.objectContaining({ startSeq: 1, preview: expect.not.stringContaining('sk-abcdefghijklmnop') }),
+      expect.objectContaining({ startSeq: 7, preview: 'Second turn for [REDACTED_EMAIL].' }),
+    ])
+
+    const selected = selectTurns(projected, [7])
+    expect(selected.turns.map(turn => turn.startSeq)).toEqual([7])
+    expect(selected.stats).toEqual({
+      turns: 1,
+      messages: 2,
+      toolCalls: 0,
+      attachmentsOmitted: 0,
+      injectedMessagesOmitted: 0,
+      toolArgumentsTruncated: 0,
+    })
+
+    expect(selectTurns(projected, [7, 1]).turns.map(turn => turn.startSeq)).toEqual([1, 7])
   })
 })
