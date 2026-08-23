@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { micromark } from 'micromark'
 import { gfm, gfmHtml } from 'micromark-extension-gfm'
 import { renderShare, ShareRenderError, type ShareLimits } from '../src/render.ts'
-import { fixtureSnapshot } from './fixtures.ts'
+import { fixtureMultiTurnSnapshot, fixtureSnapshot } from './fixtures.ts'
 
 const LIMITS: ShareLimits = {
   maxEvents: 100,
@@ -14,7 +14,7 @@ const NOW = new Date('2026-08-14T12:34:56.000Z')
 describe('share rendering', () => {
   it('renders privacy-first Markdown with no private Session metadata or active image', () => {
     const result = renderShare(fixtureSnapshot(), {
-      sessionId: 'session-private-id', format: 'markdown', includeTools: false, redact: true,
+      sessionId: 'session-private-id', format: 'markdown', includeTools: false, redact: true, selectedTurnSeqs: null,
     }, LIMITS, NOW)
     expect(result.filename).toBe('dsh-local-share-2026-08-14.md')
     expect(result.mimeType).toBe('text/markdown;charset=utf-8')
@@ -38,7 +38,7 @@ describe('share rendering', () => {
 
   it('renders script-free self-contained HTML and safely escapes authored markup', () => {
     const result = renderShare(fixtureSnapshot(), {
-      sessionId: 's1', format: 'html', includeTools: true, redact: true,
+      sessionId: 's1', format: 'html', includeTools: true, redact: true, selectedTurnSeqs: null,
     }, LIMITS, NOW)
     expect(result.filename).toBe('dsh-local-share-2026-08-14.html')
     expect(result.content).toBe(result.previewHtml)
@@ -49,6 +49,25 @@ describe('share rendering', () => {
     expect(result.content).not.toContain('<script')
     expect(result.content).not.toContain('/Users/alice')
     expect(result.content).not.toContain('PRIVATE TOOL OUTPUT')
+  })
+
+  it('exports only selected turns while returning redacted selector metadata for every turn', () => {
+    const snapshot = fixtureMultiTurnSnapshot()
+    const result = renderShare(snapshot, {
+      sessionId: 's1', format: 'markdown', includeTools: false, redact: true, selectedTurnSeqs: [7],
+    }, LIMITS, NOW)
+
+    expect(result.content).toContain('Second turn for [REDACTED_EMAIL].')
+    expect(result.content).toContain('Second answer.')
+    expect(result.content).not.toContain('Use apiKey')
+    expect(result.stats).toMatchObject({ turns: 1, messages: 2, toolCalls: 0 })
+    expect(result.turns.map(turn => turn.startSeq)).toEqual([1, 7])
+    expect(result.turns[0]?.preview).not.toContain('sk-abcdefghijklmnop')
+    expect(result.turns[1]?.preview).toBe('Second turn for [REDACTED_EMAIL].')
+
+    expect(() => renderShare(snapshot, {
+      sessionId: 's1', format: 'markdown', includeTools: false, redact: true, selectedTurnSeqs: [999],
+    }, LIMITS, NOW)).toThrow(/selected turn is no longer available/u)
   })
 
   it('renders assistant GFM as safe, polished semantic HTML while preserving user text', () => {
@@ -96,7 +115,7 @@ describe('share rendering', () => {
     ].join('\n')
 
     const result = renderShare(snapshot, {
-      sessionId: 's1', format: 'html', includeTools: false, redact: false,
+      sessionId: 's1', format: 'html', includeTools: false, redact: false, selectedTurnSeqs: null,
     }, LIMITS, NOW)
 
     expect(result.content).toContain('<div class="body user-body">Keep **this user syntax** literal.')
@@ -124,7 +143,7 @@ describe('share rendering', () => {
 
   it('retains private text only after redaction is explicitly disabled', () => {
     const result = renderShare(fixtureSnapshot(), {
-      sessionId: 's1', format: 'markdown', includeTools: true, redact: false,
+      sessionId: 's1', format: 'markdown', includeTools: true, redact: false, selectedTurnSeqs: null,
     }, LIMITS, NOW)
     expect(result.content).toContain('sk-abcdefghijklmnop')
     expect(result.content).toContain('/Users/alice/project')
@@ -134,17 +153,17 @@ describe('share rendering', () => {
 
   it('fails visibly when the Session or generated output exceeds a limit', () => {
     expect(() => renderShare(fixtureSnapshot(), {
-      sessionId: 's1', format: 'markdown', includeTools: false, redact: true,
+      sessionId: 's1', format: 'markdown', includeTools: false, redact: true, selectedTurnSeqs: null,
     }, { ...LIMITS, maxEvents: 1 }, NOW)).toThrow(ShareRenderError)
     expect(() => renderShare(fixtureSnapshot(), {
-      sessionId: 's1', format: 'markdown', includeTools: false, redact: true,
+      sessionId: 's1', format: 'markdown', includeTools: false, redact: true, selectedTurnSeqs: null,
     }, { ...LIMITS, maxOutputChars: 10 }, NOW)).toThrow(/generated output exceeds 10/)
   })
 
   it('renders an explicit empty state and null capture sequence', () => {
     const snapshot = fixtureSnapshot()
     const result = renderShare({ ...snapshot, events: [] }, {
-      sessionId: 's1', format: 'markdown', includeTools: false, redact: true,
+      sessionId: 's1', format: 'markdown', includeTools: false, redact: true, selectedTurnSeqs: null,
     }, LIMITS, NOW)
     expect(result.content).toContain('No shareable messages')
     expect(result.capturedThroughSeq).toBeNull()
@@ -167,7 +186,7 @@ describe('share rendering', () => {
       '[shortcut]: https://tracker.invalid/shortcut',
     ].join('\n')
     const result = renderShare(snapshot, {
-      sessionId: 's1', format: 'markdown', includeTools: true, redact: true,
+      sessionId: 's1', format: 'markdown', includeTools: true, redact: true, selectedTurnSeqs: null,
     }, { ...LIMITS, maxToolArgumentChars: 5 }, NOW)
     expect(result.content).toContain('Image omitted: reference')
     expect(result.content).toContain('Image omitted')
@@ -196,10 +215,10 @@ describe('share rendering', () => {
     ].join('\n')
 
     const markdown = renderShare(snapshot, {
-      sessionId: 's1', format: 'markdown', includeTools: false, redact: false,
+      sessionId: 's1', format: 'markdown', includeTools: false, redact: false, selectedTurnSeqs: null,
     }, LIMITS, NOW)
     const html = renderShare(snapshot, {
-      sessionId: 's1', format: 'html', includeTools: false, redact: false,
+      sessionId: 's1', format: 'html', includeTools: false, redact: false, selectedTurnSeqs: null,
     }, LIMITS, NOW)
 
     expect(markdown.content).toContain('Image omitted: line one line two')
@@ -228,7 +247,7 @@ describe('share rendering', () => {
     ].join('\n')
 
     const result = renderShare(snapshot, {
-      sessionId: 's1', format: 'markdown', includeTools: false, redact: false,
+      sessionId: 's1', format: 'markdown', includeTools: false, redact: false, selectedTurnSeqs: null,
     }, LIMITS, NOW)
     const reparsed = micromark(result.content, {
       extensions: [gfm()],

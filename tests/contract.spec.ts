@@ -8,11 +8,14 @@ import { fixtureResult } from './fixtures.ts'
 
 describe('DSH Local Share wire contract', () => {
   it('accepts the complete request and rejects unknown or malformed fields', () => {
-    const request = { sessionId: 's1', format: 'markdown', includeTools: false, redact: true }
+    const request = { sessionId: 's1', format: 'markdown', includeTools: false, redact: true, selectedTurnSeqs: null }
     expect(shareRequestSchema.parse(request)).toEqual(request)
+    expect(shareRequestSchema.parse({ ...request, selectedTurnSeqs: [1, 7] }).selectedTurnSeqs).toEqual([1, 7])
     expect(() => shareRequestSchema.parse({ ...request, format: 'pdf' })).toThrow()
     expect(() => shareRequestSchema.parse({ ...request, extra: true })).toThrow()
     expect(() => shareRequestSchema.parse({ ...request, sessionId: '' })).toThrow()
+    expect(() => shareRequestSchema.parse({ ...request, selectedTurnSeqs: [] })).toThrow()
+    expect(() => shareRequestSchema.parse({ ...request, selectedTurnSeqs: [1, 1] })).toThrow()
   })
 
   it('accepts the complete result and rejects loose statistics', () => {

@@ -7,7 +7,13 @@ import { DshShareHeaderAction, type DshShareProps } from '../src/client/Dialog.t
 import { en } from '../src/client/locales.ts'
 import { fixtureResult } from './fixtures.ts'
 
-const browserActions = vi.hoisted(() => ({ write: vi.fn(), download: vi.fn() }))
+const browserActions = vi.hoisted(() => ({
+  write: vi.fn(),
+  download: vi.fn(),
+  downloadBlob: vi.fn(),
+  captureImage: vi.fn(),
+  copyImage: vi.fn(),
+}))
 
 vi.mock('@deepseek-ai/dsh-client-ui-primitives', async importOriginal => ({
   ...await importOriginal<typeof import('@deepseek-ai/dsh-client-ui-primitives')>(),
@@ -16,6 +22,13 @@ vi.mock('@deepseek-ai/dsh-client-ui-primitives', async importOriginal => ({
 
 vi.mock('../src/client/download.ts', () => ({
   downloadShare: browserActions.download,
+  downloadBlob: browserActions.downloadBlob,
+}))
+
+vi.mock('../src/client/long-image.ts', () => ({
+  captureLongImage: browserActions.captureImage,
+  copyLongImage: browserActions.copyImage,
+  longImageFilename: (filename: string) => filename.replace(/\.(?:html|md)$/u, '.png'),
 }))
 
 afterEach(cleanup)
@@ -24,6 +37,11 @@ beforeEach(() => {
   browserActions.write.mockReset()
   browserActions.write.mockResolvedValue(true)
   browserActions.download.mockReset()
+  browserActions.downloadBlob.mockReset()
+  browserActions.captureImage.mockReset()
+  browserActions.captureImage.mockResolvedValue(new Blob(['png'], { type: 'image/png' }))
+  browserActions.copyImage.mockReset()
+  browserActions.copyImage.mockResolvedValue(true)
 })
 
 function translate(key: keyof typeof en, params?: Record<string, unknown>): string {
@@ -58,7 +76,7 @@ describe('DSH Local Share dialog', () => {
     const frame = await loadPreview()
     expect(remote).toHaveBeenCalledOnce()
     expect(remote.mock.calls[0]?.[0]).toEqual({
-      sessionId: 'session-1', format: 'markdown', includeTools: false, redact: true,
+      sessionId: 'session-1', format: 'markdown', includeTools: false, redact: true, selectedTurnSeqs: null,
     })
     expect(frame).toHaveAttribute('sandbox', '')
     expect(screen.getByLabelText('Automatic redaction')).toBeChecked()
@@ -66,7 +84,7 @@ describe('DSH Local Share dialog', () => {
     const acknowledgement = screen.getByLabelText(/I reviewed the preview/)
     expect(acknowledgement).toBeDisabled()
     expect(acknowledgement.closest('label')).toHaveAttribute('aria-hidden', 'true')
-    expect(screen.getByText('2 messages · 1 tool calls · 3 redactions')).toBeInTheDocument()
+    expect(screen.getByText('1 turns · 2 messages · 1 tool calls · 3 redactions')).toBeInTheDocument()
   })
 
   it('requires a fresh acknowledgement after redaction is disabled', async () => {
@@ -320,6 +338,91 @@ describe('DSH Local Share dialog', () => {
     const closeButtons = screen.getAllByRole('button', { name: 'Close' })
     fireEvent.click(closeButtons.at(-1)!)
     expect(screen.queryByRole('dialog', { name: 'Share Session' })).not.toBeInTheDocument()
+  })
+
+  it('selects an explicit non-empty turn subset and restores all turns', async () => {
+    const turns = [
+      { startSeq: 1, preview: 'First prompt', messages: 2, toolCalls: 1 },
+      { startSeq: 7, preview: 'Second prompt', messages: 2, toolCalls: 0 },
+    ]
+    const remote = vi.fn(async (_request: ShareRequest) => fixtureResult({
+      turns,
+      stats: { ...fixtureResult().stats, turns: 2, messages: 4 },
+    }))
+    renderReact(<DshShareHeaderAction {...props(remote)} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Share' }))
+    await loadPreview()
+
+    fireEvent.click(screen.getByRole('checkbox', { name: /Turn 1.*First prompt/u }))
+    await waitFor(() => { expect(remote).toHaveBeenCalledTimes(2) })
+    await loadPreview()
+    expect(remote.mock.calls[1]?.[0].selectedTurnSeqs).toEqual([7])
+    expect(screen.getByRole('checkbox', { name: /Turn 1.*First prompt/u })).not.toBeChecked()
+    expect(screen.getByRole('checkbox', { name: /Turn 2.*Second prompt/u })).toBeDisabled()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Select all' }))
+    await waitFor(() => { expect(remote).toHaveBeenCalledTimes(3) })
+    expect(remote.mock.calls[2]?.[0].selectedTurnSeqs).toBeNull()
+  })
+
+  it('copies and downloads a browser-local long PNG from the safe HTML preview', async () => {
+    const remote = vi.fn(async (_request: ShareRequest) => fixtureResult({
+      filename: 'dsh-local-share-2026-08-14.html',
+      mimeType: 'text/html;charset=utf-8',
+    }))
+    renderReact(<DshShareHeaderAction {...props(remote)} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Share' }))
+    await loadPreview()
+
+    fireEvent.click(screen.getByLabelText('Long PNG'))
+    await waitFor(() => { expect(remote).toHaveBeenCalledTimes(2) })
+    const frame = await loadPreview()
+    expect(remote.mock.calls[1]?.[0]).toMatchObject({ format: 'html', selectedTurnSeqs: null })
+    expect(frame).toHaveAttribute('sandbox', 'allow-same-origin')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Copy image' }))
+    await screen.findByRole('button', { name: 'Copied' })
+    expect(browserActions.captureImage).toHaveBeenCalledWith(frame)
+    expect(browserActions.copyImage).toHaveBeenCalledOnce()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Download image' }))
+    await waitFor(() => {
+      expect(browserActions.downloadBlob).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'image/png' }),
+        'dsh-local-share-2026-08-14.png',
+      )
+    })
+    expect(browserActions.captureImage).toHaveBeenCalledOnce()
+  })
+
+  it('does not export an unredacted long image after risk acknowledgement is withdrawn', async () => {
+    let resolveImage: ((blob: Blob) => void) | undefined
+    browserActions.captureImage.mockImplementation(() => new Promise<Blob>(resolve => { resolveImage = resolve }))
+    const remote = vi.fn(async (request: ShareRequest) => fixtureResult({
+      filename: 'dsh-local-share-2026-08-14.html',
+      mimeType: 'text/html;charset=utf-8',
+      warnings: [request.redact ? 'redaction-best-effort' : 'unredacted'],
+    }))
+    renderReact(<DshShareHeaderAction {...props(remote)} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Share' }))
+    await loadPreview()
+    fireEvent.click(screen.getByLabelText('Long PNG'))
+    await waitFor(() => { expect(remote).toHaveBeenCalledTimes(2) })
+    await loadPreview()
+    fireEvent.click(screen.getByLabelText('Automatic redaction'))
+    await waitFor(() => { expect(remote).toHaveBeenCalledTimes(3) })
+    await loadPreview()
+
+    const acknowledgement = screen.getByLabelText(/I reviewed the preview/u)
+    fireEvent.click(acknowledgement)
+    fireEvent.click(screen.getByRole('button', { name: 'Copy image' }))
+    await screen.findAllByRole('button', { name: 'Generating image…' })
+    fireEvent.click(acknowledgement)
+    await act(async () => {
+      resolveImage?.(new Blob(['png'], { type: 'image/png' }))
+    })
+
+    expect(browserActions.copyImage).not.toHaveBeenCalled()
   })
 
   it('uses localized fallback copy for a non-Error rejection', async () => {

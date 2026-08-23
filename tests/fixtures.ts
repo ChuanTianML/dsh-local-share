@@ -79,6 +79,32 @@ export function fixtureSnapshot(): SessionLogSnapshot {
   }
 }
 
+/** Representative two-turn log for explicit selection tests. */
+export function fixtureMultiTurnSnapshot(): SessionLogSnapshot {
+  const snapshot = fixtureSnapshot()
+  const events = [
+    ...snapshot.events,
+    {
+      type: 'user/message', seq: 7, time: 8, surfaceOp: 'append',
+      data: {
+        id: 'user-2', role: 'user', source: { kind: 'user' },
+        content: [{ type: 'text', text: 'Second turn for bob@example.com.' }],
+      },
+    },
+    {
+      type: 'assistant/message', seq: 8, time: 9, surfaceOp: 'append',
+      data: {
+        turn: 3, step: 1,
+        message: {
+          id: 'assistant-2', role: 'assistant', source: { kind: 'model', provider: 'fixture', model: 'fixture' },
+          content: [{ type: 'text', text: 'Second answer.' }],
+        },
+      },
+    },
+  ] as unknown as SessionEvent[]
+  return { ...snapshot, events }
+}
+
 /** Valid browser result for component and download tests. */
 export function fixtureResult(overrides: Partial<ShareResult> = {}): ShareResult {
   return {
@@ -88,8 +114,10 @@ export function fixtureResult(overrides: Partial<ShareResult> = {}): ShareResult
     previewHtml: '<!doctype html><html><body>Shared preview</body></html>',
     generatedAt: '2026-08-14T00:00:00.000Z',
     capturedThroughSeq: 6,
+    turns: [{ startSeq: 1, preview: 'Use [REDACTED_SECRET] for [REDACTED_EMAIL].', messages: 2, toolCalls: 1 }],
     warnings: ['redaction-best-effort'],
     stats: {
+      turns: 1,
       messages: 2,
       toolCalls: 1,
       redactions: 3,
