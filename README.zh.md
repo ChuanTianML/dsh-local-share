@@ -3,6 +3,34 @@
 [![CI](https://github.com/ChuanTianML/dsh-local-share/actions/workflows/ci.yml/badge.svg)](https://github.com/ChuanTianML/dsh-local-share/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
+> ### 本 fork 的本地兼容性修复（2026-10-15，`wuhongyewhy`）
+>
+> 本分支在 0.4.1 之上做了三处修复，让它能在 **DSH Hub** 后面的 DeepSeek Harness
+> **0.2.0-rc.2** 上正常工作。上游 0.4.1 是按更早的 Harness API 编译的，全新安装
+> 会在三个不同环节失败。
+>
+> 1. **Session Header 里根本不出现「分享」按钮。**
+>    `@deepseek-ai/dsh-client-ui-primitives` 已不再导出 `IconShareOutline16`、
+>    `IconCopyOutline16`、`IconDownloadOutline16`；槽位条目抛
+>    `Minified React error #130`（`args[]=undefined`），按钮被静默丢弃。当前导出
+>    改用 `…OutlineMedium` / `…OutlineRegular` 命名，本分支使用
+>    `…OutlineRegular`。
+> 2. **渲染报 `typert: … result strict codec has no create() factory`。**
+>    strict codec 现在必须声明懒工厂 `create: () => schema`，而不是直接给
+>    `schema` 值；`dsh-typert-registry` 会拒绝任何 `typeof codec.create !==
+>    "function"` 的 codec。`src/contract.ts` 中 Host 与 Web 两侧的 codec 都已更新。
+> 3. **浏览器拒绝下载。** DSH Hub 注入的 tab-session 包装器会在点击时重写所有
+>    同源链接目标。`blob:` URL 的 origin 继承自创建它的页面，因此被判定为同源，
+>    被追加了 `?__dsh_hub_session=…`，而带 query 的 Blob URL 是非法的。
+>    `downloadBlob` 现在在检测到该包装器（`window.__dshHubTabSessionWrapped`）时
+>    改用 File System Access API 直接写盘，其余场景仍走原来的 blob 链接。
+>    Chrome 与 Edge 会弹出「另存为」对话框；没有 `showSaveFilePicker` 的浏览器回
+>    退到 blob 链接。
+>
+> `lib/` 已提交，因此从 GitHub 安装 profile 时无需构建即可拿到这三处修复。
+> 第 3 项的根因在 hub 的 URL 重写脚本，对所有 hub 用户的任何 `blob:` / `data:`
+> 下载都有影响；这里的改动是客户端侧规避，不是 hub 修复。
+
 选择一个或多个 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)
 对话轮次，在本地导出为 Markdown、自包含 HTML 或 PNG 长图；默认脱敏，不上传
 内容。

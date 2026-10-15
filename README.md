@@ -3,6 +3,38 @@
 [![CI](https://github.com/ChuanTianML/dsh-local-share/actions/workflows/ci.yml/badge.svg)](https://github.com/ChuanTianML/dsh-local-share/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
+> ### Fork note — local compatibility fixes (2026-10-15, `wuhongyewhy`)
+>
+> This fork carries three fixes required to run 0.4.1 against DeepSeek Harness
+> **0.2.0-rc.2** served through **DSH Hub**. Upstream 0.4.1 was built against an
+> older Harness API, so a fresh profile install fails in three different ways.
+>
+> 1. **The Share action never appeared in the Session header.**
+>    `IconShareOutline16`, `IconCopyOutline16` and `IconDownloadOutline16` are
+>    no longer exported by `@deepseek-ai/dsh-client-ui-primitives`; the slot
+>    entry crashed with `Minified React error #130` (`args[]=undefined`) and the
+>    button was silently dropped. The current exports use the
+>    `…OutlineMedium` / `…OutlineRegular` naming, so this fork imports
+>    `…OutlineRegular`.
+> 2. **Render failed with `typert: … result strict codec has no create() factory`.**
+>    A strict codec must now declare a lazy factory — `create: () => schema` —
+>    instead of a `schema` value; `dsh-typert-registry` rejects anything where
+>    `typeof codec.create !== "function"`. Both codecs in `src/contract.ts` were
+>    updated, in the Host manifest and in the Web half.
+> 3. **The browser refused the download.** DSH Hub injects a tab-session wrapper
+>    that rewrites every same-origin link target during the click. A `blob:` URL
+>    reports the origin that created it, so it counted as same-origin and got
+>    `?__dsh_hub_session=…` appended, which makes a Blob URL invalid.
+>    `downloadBlob` now writes the file through the File System Access API when
+>    that wrapper is present (`window.__dshHubTabSessionWrapped`), and keeps the
+>    original blob-link path everywhere else. Chrome and Edge show a *Save as*
+>    dialog; browsers without `showSaveFilePicker` fall back to the blob link.
+>
+> `lib/` is committed, so a GitHub profile install gets all three fixes without
+> a build step. Issue 3 is a Hub-side URL-rewriting bug that affects every
+> `blob:` or `data:` download for every Hub user; the change here is a
+> client-side workaround, not a Hub fix.
+
 Select and locally share one or more
 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) conversation
 turns as Markdown, self-contained HTML, or a long PNG, with privacy-first

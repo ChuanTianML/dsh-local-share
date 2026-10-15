@@ -4,9 +4,9 @@ import type { ReactNode } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-client-runtime/client'
 import {
   Button,
-  IconCopyOutline16,
-  IconDownloadOutline16,
-  IconShareOutline16,
+  IconCopyOutlineRegular,
+  IconDownloadOutlineRegular,
+  IconShareOutlineRegular,
   Modal,
   writeClipboard,
 } from '@deepseek-ai/dsh-client-ui-primitives'
@@ -193,7 +193,7 @@ export function DshShareHeaderAction({ sessionId, render, t }: DshShareProps): R
     if (format === 'png') {
       void generateLongImage().then(blob => {
         if (blob !== undefined && exportAuthorized.current) {
-          downloadBlob(blob, longImageFilename(result.filename))
+          void downloadBlob(blob, longImageFilename(result.filename))
         }
       })
       return
@@ -220,7 +220,7 @@ export function DshShareHeaderAction({ sessionId, render, t }: DshShareProps): R
     <>
       <button type="button" className="dsh-local-share-action" onClick={show}>
         <span>{t('action')}</span>
-        <IconShareOutline16 size={12} />
+        <IconShareOutlineRegular size={12} />
       </button>
       <Modal
         open={open}
@@ -235,7 +235,7 @@ export function DshShareHeaderAction({ sessionId, render, t }: DshShareProps): R
             <Button variant="outline" onClick={close}>{t('close')}</Button>
             <Button
               variant="outline"
-              icon={<IconCopyOutline16 />}
+              icon={<IconCopyOutlineRegular />}
               disabled={!allowed}
               onClick={copy}
             >
@@ -249,7 +249,7 @@ export function DshShareHeaderAction({ sessionId, render, t }: DshShareProps): R
             </Button>
             <Button
               variant="primary"
-              icon={<IconDownloadOutline16 />}
+              icon={<IconDownloadOutlineRegular />}
               disabled={!allowed}
               onClick={download}
             >
