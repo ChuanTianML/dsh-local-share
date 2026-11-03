@@ -172,8 +172,10 @@ corepack enable
 pnpm install
 git clone https://github.com/deepseek-ai/deepseek-harness.git .sandbox/harness
 git -C .sandbox/harness checkout b830ec950faba0a46dda564be3e2d854afed94f1
-pnpm --dir .sandbox/harness install --frozen-lockfile
-pnpm --dir .sandbox/harness run build
+cd .sandbox/harness
+pnpm install --frozen-lockfile
+pnpm run build
+cd ../..
 pnpm run check
 ```
 

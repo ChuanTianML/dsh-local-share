@@ -38,9 +38,10 @@ jobs:
           git clone https://github.com/deepseek-ai/deepseek-harness.git .sandbox/harness
           git -C .sandbox/harness checkout "$DSH_COMMIT"
       - name: Build verified DeepSeek Harness
+        working-directory: .sandbox/harness
         run: |
-          pnpm --dir .sandbox/harness install --frozen-lockfile
-          pnpm --dir .sandbox/harness run build
+          pnpm install --frozen-lockfile
+          pnpm run build
       - run: pnpm run check
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm run test:browser
