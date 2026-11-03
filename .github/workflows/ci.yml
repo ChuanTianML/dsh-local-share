@@ -32,6 +32,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - run: corepack enable
+      - run: corepack install --global pnpm@11.7.0
       - run: pnpm install --frozen-lockfile
       - name: Check out verified DeepSeek Harness
         run: |

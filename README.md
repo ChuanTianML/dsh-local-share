@@ -182,6 +182,7 @@ The verified Harness revision is
 
 ```sh
 corepack enable
+corepack install --global pnpm@11.7.0
 pnpm install
 git clone https://github.com/deepseek-ai/deepseek-harness.git .sandbox/harness
 git -C .sandbox/harness checkout b830ec950faba0a46dda564be3e2d854afed94f1
