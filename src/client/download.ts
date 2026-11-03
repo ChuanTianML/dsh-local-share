@@ -1,4 +1,4 @@
-/** Browser-only download helper for generated local files. */
+/** Browser-only downloads isolated from host-page link rewriting. */
 import type { ShareResult } from '../contract.ts'
 
 /** Browser operations used by {@link downloadShare}. */
@@ -9,27 +9,23 @@ export interface DownloadEnvironment {
 }
 
 /**
- * Start one local browser download and release its object URL.
+ * Download one rendered local document.
  * @param result - rendered file metadata and source.
- * @param environment - injectable browser operations for tests.
+ * @param environment - browser operations used to create and release local URLs.
  */
 export function downloadShare(
   result: ShareResult,
-  environment: DownloadEnvironment = {
-    document,
-    createObjectURL: blob => URL.createObjectURL(blob),
-    revokeObjectURL: url => { URL.revokeObjectURL(url) },
-  },
+  environment?: DownloadEnvironment,
 ): void {
-  const blob = new Blob([result.content], { type: result.mimeType })
-  downloadBlob(blob, result.filename, environment)
+  downloadBlob(new Blob([result.content], { type: result.mimeType }), result.filename, environment)
 }
 
 /**
- * Start one local Blob download and release its object URL.
+ * Start a Blob download from a script-free frame so host-page click handlers and
+ * patched anchor prototypes cannot append session parameters to the Blob URL.
  * @param blob - browser-local file content.
  * @param filename - safe generated filename.
- * @param environment - injectable browser operations for tests.
+ * @param environment - browser operations used to create and release local URLs.
  */
 export function downloadBlob(
   blob: Blob,
@@ -40,17 +36,26 @@ export function downloadBlob(
     revokeObjectURL: url => { URL.revokeObjectURL(url) },
   },
 ): void {
+  const frame = environment.document.createElement('iframe')
+  frame.hidden = true
+  frame.setAttribute('sandbox', 'allow-same-origin allow-downloads')
+  frame.title = 'Local file download'
+  environment.document.body.append(frame)
   const url = environment.createObjectURL(blob)
-  const anchor = environment.document.createElement('a')
-  anchor.href = url
-  anchor.download = filename
-  anchor.rel = 'noopener'
-  anchor.hidden = true
-  environment.document.body.append(anchor)
   try {
+    const frameDocument = frame.contentDocument
+    if (frameDocument === null) throw new Error('dsh-local-share: download frame is unavailable')
+    const anchor = frameDocument.createElement('a')
+    anchor.href = url
+    anchor.download = filename
+    anchor.rel = 'noopener'
+    frameDocument.body.append(anchor)
     anchor.click()
   } finally {
-    anchor.remove()
-    environment.revokeObjectURL(url)
+    // Let the browser consume the queued download before releasing its document.
+    setTimeout(() => {
+      frame.remove()
+      environment.revokeObjectURL(url)
+    }, 1000)
   }
 }

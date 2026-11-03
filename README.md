@@ -39,14 +39,14 @@ DSH is currently a developer preview. Install the exact npm release into the
 Web profile, then start DSH:
 
 ```sh
-dsh plugin --profile web add dsh-local-share@0.4.1
+dsh plugin --profile web add dsh-local-share@0.5.0
 dsh --profile web
 ```
 
 GitHub remains an alternative source:
 
 ```sh
-dsh plugin --profile web add github:ChuanTianML/dsh-local-share#v0.4.1
+dsh plugin --profile web add github:ChuanTianML/dsh-local-share#v0.5.0
 ```
 
 Open a non-empty Session and select **Share** in its header. The safe defaults
@@ -65,7 +65,7 @@ unrelated community plugin named `dsh-share`:
 
 ```sh
 dsh plugin --profile web remove dsh-share
-dsh plugin --profile web add dsh-local-share@0.4.1
+dsh plugin --profile web add dsh-local-share@0.5.0
 ```
 
 ## See the privacy flow
@@ -88,11 +88,11 @@ profile patch. Paste this request into a Coding Agent that has terminal access
 to the machine where DSH is installed:
 
 ```text
-Install DSH Local Share 0.4.1 into my DeepSeek Harness Web profile.
+Install DSH Local Share 0.5.0 into my DeepSeek Harness Web profile.
 
 1. Detect the active DSH_HOME and dsh version. Do not modify another profile.
 2. Inspect the repository package.json lifecycle scripts before installation.
-3. Install dsh-local-share@0.4.1 from npm into profile web.
+3. Install dsh-local-share@0.5.0 from npm into profile web.
 4. Preserve unrelated entries in profiles/web/cordis.patch.yml. Configure the
    dsh-local-share entry with maxEvents 20000, maxOutputChars 2000000, and
    maxToolArgumentChars 12000.
@@ -177,14 +177,14 @@ data that a replay or forensic workflow would need.
 ## Development
 
 The verified Harness revision is
-`47f943859bef60e4160492346772ded9b24f765a`. Keep the checkout isolated under
+`b830ec950faba0a46dda564be3e2d854afed94f1`. Keep the checkout isolated under
 `.sandbox/harness`:
 
 ```sh
 corepack enable
 pnpm install
 git clone https://github.com/deepseek-ai/deepseek-harness.git .sandbox/harness
-git -C .sandbox/harness checkout 47f943859bef60e4160492346772ded9b24f765a
+git -C .sandbox/harness checkout b830ec950faba0a46dda564be3e2d854afed94f1
 pnpm --dir .sandbox/harness install --frozen-lockfile
 pnpm --dir .sandbox/harness run build
 pnpm run check
@@ -196,12 +196,18 @@ composition tests, Host/browser builds, coverage, and a package dry run. Built
 `lib/` artifacts are committed because GitHub profile installs do not run a
 build step.
 
+Run `pnpm exec playwright install chromium` and `pnpm run test:browser` for
+real-browser download and privacy checks. See [release validation](docs/validation-0.5.0.md).
+
 The complete product and security design is in [docs/design.md](docs/design.md).
 
 ## Compatibility
 
-Version 0.4.1 targets the DSH developer-preview API at the verified revision
-above. DSH does not yet promise stable external plugin compatibility; future
+Version 0.5.0 requires Harness >=0.2.1-rc.5 and <0.3.0. It is verified
+against the published 0.2.1-rc.5 runtime and its matching source revision.
+Upgrade Harness before upgrading this plugin; the former client-runtime module
+is no longer used. Older Harness builds are not supported by this release.
+DSH does not yet promise stable external plugin compatibility; future
 Harness changes may require a new DSH Local Share release.
 
 ## Security

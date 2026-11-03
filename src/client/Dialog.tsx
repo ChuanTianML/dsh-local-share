@@ -1,12 +1,12 @@
 /** Session Header action and privacy-gated Share dialog. */
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import type { SessionId } from '@deepseek-ai/dsh-client-runtime/client'
+import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import {
   Button,
-  IconCopyOutline16,
-  IconDownloadOutline16,
-  IconShareOutline16,
+  IconCopyOutlineRegular,
+  IconDownloadOutlineRegular,
+  IconShareOutlineRegular,
   Modal,
   writeClipboard,
 } from '@deepseek-ai/dsh-client-ui-primitives'
@@ -108,6 +108,7 @@ export function DshShareHeaderAction({ sessionId, render, t }: DshShareProps): R
   }, [includeTools, open, redact, render, requestKey, selectedTurnSeqs, sessionId, t, wireFormat])
 
   const invalidatePreview = (): void => {
+    exportAuthorized.current = false
     activeGeneration.current = undefined
     imageCache.current = undefined
     setImageState('idle')
@@ -134,8 +135,8 @@ export function DshShareHeaderAction({ sessionId, render, t }: DshShareProps): R
     setRedact(enabled)
     setAcknowledged(false)
   }
-  const allowed = result !== undefined && !previewUpdating && imageState !== 'working' && (redact || acknowledged)
-  exportAuthorized.current = allowed
+  exportAuthorized.current = open && result !== undefined && !previewUpdating && (redact || acknowledged)
+  const allowed = exportAuthorized.current && imageState !== 'working'
   const finishPreview = (generation: number): void => {
     if (activeGeneration.current !== generation || rendered?.generation !== generation || rendered.requestKey !== requestKey) return
     if (previewReadyFrame.current !== undefined) cancelAnimationFrame(previewReadyFrame.current)
@@ -220,7 +221,7 @@ export function DshShareHeaderAction({ sessionId, render, t }: DshShareProps): R
     <>
       <button type="button" className="dsh-local-share-action" onClick={show}>
         <span>{t('action')}</span>
-        <IconShareOutline16 size={12} />
+        <IconShareOutlineRegular size={12} />
       </button>
       <Modal
         open={open}
@@ -235,7 +236,7 @@ export function DshShareHeaderAction({ sessionId, render, t }: DshShareProps): R
             <Button variant="outline" onClick={close}>{t('close')}</Button>
             <Button
               variant="outline"
-              icon={<IconCopyOutline16 />}
+              icon={<IconCopyOutlineRegular />}
               disabled={!allowed}
               onClick={copy}
             >
@@ -249,7 +250,7 @@ export function DshShareHeaderAction({ sessionId, render, t }: DshShareProps): R
             </Button>
             <Button
               variant="primary"
-              icon={<IconDownloadOutline16 />}
+              icon={<IconDownloadOutlineRegular />}
               disabled={!allowed}
               onClick={download}
             >

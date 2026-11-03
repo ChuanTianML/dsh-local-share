@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.5.0 - 2026-11-03
+
+- Restore the Share action and strict Remote registration with current Harness
+  icon exports and lazy codec factories, based on @wuhongyewhy’s PR #7.
+- Require Harness >=0.2.1-rc.5 and <0.3.0; use the current renderer and Gateway
+  APIs after removal of client-runtime.
+- Download Markdown, HTML, and PNG through a script-free local frame so host
+  link rewriting cannot corrupt Blob URLs; no file-picker API is required.
+- Read tool failure status from current tool-role messages without exporting
+  their contents.
+- Preserve export consent while a PNG is generating so the first copy/download
+  click completes; changing privacy options or closing the dialog still cancels it.
+- Rebuild all committed artifacts and add browser, privacy, and codec regressions.
+
 ## 0.4.1 - 2026-08-23
 
 - Surface turn selection, local Markdown, self-contained HTML, long PNG,

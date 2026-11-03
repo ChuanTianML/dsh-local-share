@@ -93,7 +93,7 @@ export const DSH_SHARE_INVOCATIONS: readonly InvocationDescriptor[] = [
         codec: {
           mode: 'strict',
           typeSymbol: 'dsh-local-share#ShareRequest',
-          schema: shareRequestSchema,
+          create: () => shareRequestSchema,
         },
       },
     ],
@@ -101,7 +101,7 @@ export const DSH_SHARE_INVOCATIONS: readonly InvocationDescriptor[] = [
     result: {
       mode: 'strict',
       typeSymbol: 'dsh-local-share#ShareResult',
-      schema: shareResultSchema,
+      create: () => shareResultSchema,
     },
   },
 ]

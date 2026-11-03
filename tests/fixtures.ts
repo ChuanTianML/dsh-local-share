@@ -1,4 +1,4 @@
-import type { SessionEvent, SessionId } from '@deepseek-ai/dsh-session'
+import { SessionLogOffset, type SessionEvent, type SessionId } from '@deepseek-ai/dsh-session'
 import type { SessionLogSnapshot } from '@deepseek-ai/dsh-session-query'
 import type { ShareResult } from '../src/contract.ts'
 
@@ -51,8 +51,9 @@ export function fixtureSnapshot(): SessionLogSnapshot {
       data: {
         turn: 1, step: 1,
         message: {
-          id: 'result-1', role: 'user', source: { kind: 'tool', callId: 'call-1' },
-          content: [{ type: 'tool-result', toolCallId: 'call-1', content: [{ type: 'text', text: 'PRIVATE TOOL OUTPUT' }] }],
+          id: 'result-1', role: 'tool', source: { kind: 'tool', callId: 'call-1' },
+          toolCallId: 'call-1', isError: false,
+          content: [{ type: 'text', text: 'PRIVATE TOOL OUTPUT' }],
         },
       },
     },
@@ -70,12 +71,13 @@ export function fixtureSnapshot(): SessionLogSnapshot {
   ] as unknown as SessionEvent[]
   return {
     session: {
-      version: 0,
+      version: 4,
+      isSeeded: false,
       id: 'session-private-id' as SessionId,
       createdAt: 1,
-      cwd: '/Users/alice/project',
     },
     events,
+    inheritedEventCount: SessionLogOffset(0),
   }
 }
 

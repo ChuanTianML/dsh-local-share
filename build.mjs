@@ -2,6 +2,8 @@
 import { execFileSync } from 'node:child_process'
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { build } from 'esbuild'
+import process from 'node:process'
+import { fileURLToPath } from 'node:url'
 
 mkdirSync('lib', { recursive: true })
 
@@ -55,4 +57,4 @@ await build({
 normalizeGeneratedText('lib/index.js')
 normalizeGeneratedText('lib/client.js')
 
-execFileSync('node_modules/.bin/tsc', ['-p', 'tsconfig.json'], { stdio: 'inherit' })
+execFileSync(process.execPath, [fileURLToPath(import.meta.resolve('typescript/bin/tsc')), '-p', 'tsconfig.json'], { stdio: 'inherit' })

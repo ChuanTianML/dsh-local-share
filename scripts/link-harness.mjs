@@ -25,7 +25,9 @@ const packages = new Map([
   ['@deepseek-ai/cordis', 'vendor/cordis'],
   ['@deepseek-ai/schemastery', 'vendor/schemastery'],
   ['@deepseek-ai/dsh-client-locale', 'packages/client/locale'],
-  ['@deepseek-ai/dsh-client-runtime', 'packages/client/runtime'],
+  ['@deepseek-ai/dsh-client-ui-renderer', 'packages/client/ui-renderer'],
+  ['@deepseek-ai/dsh-client-ui-session', 'packages/client/ui-session'],
+  ['@deepseek-ai/dsh-api-gateway', 'packages/api/gateway'],
   ['@deepseek-ai/dsh-client-ui-conversation', 'packages/client/ui-conversation'],
   ['@deepseek-ai/dsh-client-ui-primitives', 'packages/client/ui-primitives'],
   ['@deepseek-ai/dsh-client-ui-slots', 'packages/client/ui-slots'],
@@ -48,5 +50,5 @@ for (const [name, relative] of packages) {
     if (existing.isSymbolicLink() && realpathSync(link) === realpathSync(target)) continue
     throw new Error(`dsh-local-share: refusing to replace existing dependency at ${link}`)
   }
-  symlinkSync(target, link, 'dir')
+  symlinkSync(target, link, process.platform === 'win32' ? 'junction' : 'dir')
 }

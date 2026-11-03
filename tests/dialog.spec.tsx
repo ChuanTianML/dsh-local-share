@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render as renderReact, screen, waitFor } from '@testing-library/react'
-import type { SessionId } from '@deepseek-ai/dsh-client-runtime/client'
+import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { ShareRequest } from '../src/contract.ts'
 import { DshShareHeaderAction, type DshShareProps } from '../src/client/Dialog.tsx'
@@ -393,6 +393,24 @@ describe('DSH Local Share dialog', () => {
       )
     })
     expect(browserActions.captureImage).toHaveBeenCalledOnce()
+  })
+
+  it.each(['Copy image', 'Download image'])('finishes a delayed PNG %s on the first click', async action => {
+    let resolveImage!: (blob: Blob) => void
+    browserActions.captureImage.mockImplementation(() => new Promise<Blob>(resolve => { resolveImage = resolve }))
+    const remote = vi.fn(async () => fixtureResult({ filename: 'share.html', mimeType: 'text/html;charset=utf-8' }))
+    renderReact(<DshShareHeaderAction {...props(remote)} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Share' }))
+    await loadPreview()
+    fireEvent.click(screen.getByLabelText('Long PNG'))
+    await waitFor(() => { expect(remote).toHaveBeenCalledTimes(2) })
+    await loadPreview()
+    fireEvent.click(screen.getByRole('button', { name: action }))
+    await screen.findAllByRole('button', { name: 'Generating image…' })
+    await act(async () => { resolveImage(new Blob(['png'], { type: 'image/png' })) })
+    await waitFor(() => {
+      expect(action === 'Copy image' ? browserActions.copyImage : browserActions.downloadBlob).toHaveBeenCalledOnce()
+    })
   })
 
   it('does not export an unredacted long image after risk acknowledgement is withdrawn', async () => {

@@ -37,14 +37,14 @@ DSH 目前仍处于开发者预览阶段。把精确的 npm release 安装到 We
 启动 DSH：
 
 ```sh
-dsh plugin --profile web add dsh-local-share@0.4.1
+dsh plugin --profile web add dsh-local-share@0.5.0
 dsh --profile web
 ```
 
 也可以继续从 GitHub 安装：
 
 ```sh
-dsh plugin --profile web add github:ChuanTianML/dsh-local-share#v0.4.1
+dsh plugin --profile web add github:ChuanTianML/dsh-local-share#v0.5.0
 ```
 
 打开一个非空 Session，点击 Header 中的 **分享**。安全默认值是 Markdown、排除
@@ -63,7 +63,7 @@ dsh plugin --profile web remove dsh-local-share
 
 ```sh
 dsh plugin --profile web remove dsh-share
-dsh plugin --profile web add dsh-local-share@0.4.1
+dsh plugin --profile web add dsh-local-share@0.5.0
 ```
 
 ## 查看隐私保护流程
@@ -83,11 +83,11 @@ dsh plugin --profile web add dsh-local-share@0.4.1
 把下面的请求交给能够访问 DSH 所在机器终端的 Coding Agent：
 
 ```text
-请把 DSH Local Share 0.4.1 安装到我的 DeepSeek Harness Web profile。
+请把 DSH Local Share 0.5.0 安装到我的 DeepSeek Harness Web profile。
 
 1. 先检测当前 DSH_HOME 和 dsh 版本，不要修改其他 profile。
 2. 安装前检查仓库 package.json 中的生命周期脚本。
-3. 从 npm 将 dsh-local-share@0.4.1 安装到 web profile。
+3. 从 npm 将 dsh-local-share@0.5.0 安装到 web profile。
 4. 保留 profiles/web/cordis.patch.yml 中无关的条目。为 dsh-local-share 写入
    maxEvents 20000、maxOutputChars 2000000、maxToolArgumentChars 12000。
 5. 运行 dsh --profile web --dump-config，证明三个值已经进入最终配置。
@@ -164,14 +164,14 @@ Session 或总输出超限会明确失败。只有工具参数允许截断，预
 ## 开发
 
 已验证的 Harness revision 是
-`47f943859bef60e4160492346772ded9b24f765a`。请把开发 checkout 隔离到
+`b830ec950faba0a46dda564be3e2d854afed94f1`。请把开发 checkout 隔离到
 `.sandbox/harness`：
 
 ```sh
 corepack enable
 pnpm install
 git clone https://github.com/deepseek-ai/deepseek-harness.git .sandbox/harness
-git -C .sandbox/harness checkout 47f943859bef60e4160492346772ded9b24f765a
+git -C .sandbox/harness checkout b830ec950faba0a46dda564be3e2d854afed94f1
 pnpm --dir .sandbox/harness install --frozen-lockfile
 pnpm --dir .sandbox/harness run build
 pnpm run check
@@ -182,11 +182,16 @@ checkout。`pnpm run check` 会运行严格类型检查、ESLint、单元与组�
 浏览器构建、覆盖率以及 package dry run。profile 安装不会执行构建，因此仓库会
 提交 `lib/` 产物。
 
+浏览器验证：执行 `pnpm exec playwright install chromium`，然后执行
+`pnpm run test:browser`。验证范围见 [0.5.0 验证记录](docs/validation-0.5.0.md)。
+
 完整产品与安全设计见 [docs/design.md](docs/design.md)。
 
 ## 兼容性
 
-0.4.1 面向上述 DSH 开发者预览 revision。DSH 尚未承诺稳定的外部插件兼容性；
+0.5.0 需要 Harness >=0.2.1-rc.5 且 <0.3.0，本次验证使用官方 0.2.1-rc.5。
+请先升级 Harness，再升级插件；此版本不再依赖已移除的 client-runtime 模块，
+不支持旧版 Harness。DSH 尚未承诺稳定的外部插件兼容性；
 Harness 后续变化可能需要发布新的 DSH Local Share 版本。
 
 ## 安全报告

@@ -103,7 +103,6 @@ function visibleText(content: readonly ContentBlock[]): TextProjection {
         break
       case 'reasoning':
       case 'tool-call':
-      case 'tool-result':
         break
       default:
         // ContentBlockMap is merge-extensible. Unknown plugin blocks remain private.
@@ -123,8 +122,7 @@ function toolOutcomes(events: readonly SessionEvent[]): ReadonlyMap<string, Tool
   const outcomes = new Map<string, ToolOutcome>()
   for (const event of events) {
     if (event.type !== 'tool/result') continue
-    const result = event.data.message.content[0]
-    const failed = event.data.error !== undefined || result.isError === true
+    const failed = event.data.error !== undefined || event.data.message.isError === true
     outcomes.set(String(event.data.message.source.callId), {
       status: failed ? 'failed' : 'succeeded',
       ...event.data.error === undefined ? {} : { errorCode: event.data.error.code },
