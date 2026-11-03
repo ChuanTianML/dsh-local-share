@@ -12,25 +12,37 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  DSH_COMMIT: 47f943859bef60e4160492346772ded9b24f765a
+  DSH_COMMIT: b830ec950faba0a46dda564be3e2d854afed94f1
 
 jobs:
   check:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: [22.22.0, 24.15.0]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
-          node-version: 22.22.0
+          node-version: ${{ matrix.node }}
       - run: corepack enable
+      - run: corepack install --global pnpm@11.7.0
       - run: pnpm install --frozen-lockfile
       - name: Check out verified DeepSeek Harness
         run: |
           git clone https://github.com/deepseek-ai/deepseek-harness.git .sandbox/harness
           git -C .sandbox/harness checkout "$DSH_COMMIT"
       - name: Build verified DeepSeek Harness
+        working-directory: .sandbox/harness
         run: |
-          pnpm --dir .sandbox/harness install --frozen-lockfile
-          pnpm --dir .sandbox/harness run build
+          pnpm install --frozen-lockfile
+          pnpm run build
       - run: pnpm run check
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm run test:browser

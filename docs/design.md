@@ -111,9 +111,9 @@ truncated; the document and statistics state that truncation.
 
 ## Compatibility and verification
 
-Version 0.4.1 targets the DSH developer-preview API at Harness commit
-`47f943859bef60e4160492346772ded9b24f765a`. DSH has no stable external plugin
-compatibility promise yet, so this repository pins the verified commit in CI.
+Supported Harness versions and the verified revision are listed in
+[README compatibility](../README.md#compatibility). DSH has no stable external
+plugin compatibility promise yet, so this repository pins the verified commit in CI.
 
 Unit tests cover projection, redaction, safe GFM rendering, limits, wire codecs,
 stable preview loading, browser acknowledgement, stale request cancellation,
@@ -122,7 +122,8 @@ copy, and download. Composition
 tests mount the Host plugin over real Cordis and Typert services. Release
 verification builds the committed Host and browser artifacts, installs the
 bundle into an isolated Web profile, starts it on a non-default local port, and
-checks the served plugin asset and Remote response path. The prebuilt package is
+checks the served plugin asset, Remote response path, and actual browser downloads.
+See [0.5.0 validation](validation-0.5.0.md) for the repeatable acceptance checks. The prebuilt package is
 published to npm as `dsh-local-share`; exact GitHub release and packed-tarball
 installation use the same committed artifacts.
 

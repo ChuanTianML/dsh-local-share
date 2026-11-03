@@ -66,7 +66,7 @@ describe('Session share projection', () => {
     const result = events.find(event => event.type === 'tool/result')
     if (result?.type !== 'tool/result') throw new Error('fixture tool result missing')
     result.data.error = { name: 'FixtureError', code: 'EXIT_7' }
-    result.data.message.content[0].isError = true
+    result.data.message = { ...result.data.message, isError: true }
     events.push({
       type: 'tool/call', seq: 7, time: 8,
       data: { turn: 1, step: 2, callId: 'orphan', name: 'orphan', arguments: '{}' },
@@ -84,6 +84,16 @@ describe('Session share projection', () => {
         status: 'unknown', truncated: false,
       },
     ])
+  })
+
+  it('reads message-level tool failure even when the result has no content', () => {
+    const events = structuredClone(fixtureSnapshot().events) as SessionEvent[]
+    const result = events.find(event => event.type === 'tool/result')
+    if (result?.type !== 'tool/result') throw new Error('fixture tool result missing')
+    result.data.message = { ...result.data.message, isError: true, content: [] }
+    const projected = projectSession(events, true, 1_000)
+    expect(projected.turns.flatMap(turn => turn.entries).find(entry => entry.kind === 'tool'))
+      .toMatchObject({ status: 'failed' })
   })
 
   it('groups user-led turns and selects them in log order with recomputed counts', () => {

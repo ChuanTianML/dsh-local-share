@@ -28,6 +28,16 @@ describe('DSH Local Share wire contract', () => {
     expect(() => shareResultSchema.parse({ ...result, warnings: ['unknown'] })).toThrow()
   })
 
+  it('materializes strict request and result codecs with validation intact', () => {
+    const descriptor = DSH_SHARE_INVOCATIONS[0]!
+    const requestCodec = descriptor.parameters[0]!.codec!
+    const resultCodec = descriptor.result!
+    if (requestCodec.mode !== 'strict' || resultCodec.mode !== 'strict') throw new Error('strict codecs required')
+    expect(() => requestCodec.create().parse({ sessionId: 's1', format: 'pdf' })).toThrow()
+    expect(resultCodec.create().parse(fixtureResult())).toEqual(fixtureResult())
+    expect(() => resultCodec.create().parse({ ...fixtureResult(), extra: true })).toThrow()
+  })
+
   it('publishes one strict cancellable direct invocation', () => {
     expect(DSH_SHARE_INVOCATIONS).toHaveLength(1)
     expect(DSH_SHARE_INVOCATIONS[0]).toMatchObject({

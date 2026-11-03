@@ -21,15 +21,15 @@ export interface Config {
     maxToolArgumentChars?: number;
 }
 /** Configuration schema with positive-integer defaults. */
-export declare const Config: z<Schemastery.ObjectS<{
-    maxEvents: z<number, number>;
-    maxOutputChars: z<number, number>;
-    maxToolArgumentChars: z<number, number>;
-}>, Schemastery.ObjectT<{
-    maxEvents: z<number, number>;
-    maxOutputChars: z<number, number>;
-    maxToolArgumentChars: z<number, number>;
-}>>;
+export declare const Config: z<Schemastery.ObjectS<NoInfer<{
+    maxEvents: z<number, number, "defined">;
+    maxOutputChars: z<number, number, "defined">;
+    maxToolArgumentChars: z<number, number, "defined">;
+}>>, Schemastery.ObjectT<NoInfer<{
+    maxEvents: z<number, number, "defined">;
+    maxOutputChars: z<number, number, "defined">;
+    maxToolArgumentChars: z<number, number, "defined">;
+}>>, "plain">;
 /**
  * Mount the share service and strict wire manifest.
  * @param ctx - Host Cordis context.

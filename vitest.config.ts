@@ -39,7 +39,7 @@ export default defineConfig({
   resolve: {
     dedupe: ['react', 'react-dom'],
     alias: {
-      '@deepseek-ai/dsh-client-runtime/client': dsh('packages/client/runtime/src/client/index.ts'),
+      '@deepseek-ai/dsh-client-ui-renderer/client': dsh('packages/client/ui-renderer/src/client/index.ts'),
       '@deepseek-ai/dsh-client-locale/client': dsh('packages/client/locale/src/client/index.ts'),
     },
   },

@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { SessionId } from '@deepseek-ai/dsh-client-runtime/client';
+import type { SessionId } from '@deepseek-ai/dsh-session/types';
 import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots';
 import type { ShareRequest, ShareResult } from '../contract.ts';
 import { NS } from './locales.ts';
